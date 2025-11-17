@@ -1,4 +1,5 @@
 package com.example.GetJob.user;
+import com.example.GetJob.auth.model.Role;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
