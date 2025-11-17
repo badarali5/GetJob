@@ -4,7 +4,7 @@ import com.example.GetJob.auth.dto.AuthResponse;
 import com.example.GetJob.auth.dto.SigninRequest;
 import com.example.GetJob.auth.dto.SignupRequest;
 import com.example.GetJob.auth.model.User;
-import com.example.GetJob.auth.repository.UserRepository;
+import com.example.GetJob.auth.repository.AuthUserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,20 +18,20 @@ import java.util.Date;
 
 @Service
 public class AuthService {
-    private final UserRepository userRepository;
+    private final AuthUserRepository authUserRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SecretKey jwtSecretKey;
 
-    public AuthService(UserRepository userRepository,
+    public AuthService(AuthUserRepository authUserRepository,
                        @Value("${jwt.secret:mySecretKeyForJWTTokenGenerationThatIsLongEnough}") String jwtSecret) {
-        this.userRepository = userRepository;
+        this.authUserRepository = authUserRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     public AuthResponse signup(SignupRequest request) {
         // Check if user already exists
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (authUserRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");
         }
 
@@ -43,7 +43,7 @@ public class AuthService {
         user.setRole(request.getRole());
         user.setCreatedAt(LocalDateTime.now());
 
-        user = userRepository.save(user);
+        user = authUserRepository.save(user);
 
         // Generate JWT token
         String token = generateToken(user);
@@ -53,7 +53,7 @@ public class AuthService {
 
     public AuthResponse signin(SigninRequest request) {
         // Find user by email
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = authUserRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         // Verify password

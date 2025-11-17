@@ -1,6 +1,7 @@
 // Vite exposes env variables via import.meta.env and requires the VITE_ prefix.
 // Fallback to an empty string so relative paths work during dev (Vite proxy).
-const API_BASE = ((import.meta as any).env?.VITE_API_URL || '').replace(/\/$/, '');
+const env = import.meta.env as { VITE_API_URL?: string };
+const API_BASE = (env.VITE_API_URL || '').replace(/\/$/, '');
 
 type FetchError = {
     status: number;
@@ -8,7 +9,6 @@ type FetchError = {
 };
 
 async function request(path: string, opts: RequestInit = {}) {
-    // If API_BASE is set, use it. Otherwise assume relative path (dev proxy).
     const url = API_BASE ? `${API_BASE}${path}` : path;
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
