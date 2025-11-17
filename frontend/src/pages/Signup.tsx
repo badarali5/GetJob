@@ -165,15 +165,11 @@ const Signup = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="SOFTWARE_ENG">
-                          Software Engineer
-                        </SelectItem>
+                        <SelectItem value="SOFTWARE_ENG">Software Engineer</SelectItem>
                         <SelectItem value="AI_ENG">AI Engineer</SelectItem>
                         <SelectItem value="DEVOPS">DevOps Engineer</SelectItem>
                         <SelectItem value="ML">ML Engineer</SelectItem>
-                        <SelectItem value="CYBERSECURITY">
-                          Cybersecurity Specialist
-                        </SelectItem>
+                        <SelectItem value="CYBERSECURITY">Cybersecurity Specialist</SelectItem>
                         <SelectItem value="OTHER">Other</SelectItem>
                       </SelectContent>
                     </Select>

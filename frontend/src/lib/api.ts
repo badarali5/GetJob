@@ -1,4 +1,6 @@
-const API_BASE = (process.env.REACT_APP_API_URL || '').replace(/\/$/, '');
+// Vite exposes env variables via import.meta.env and requires the VITE_ prefix.
+// Fallback to an empty string so relative paths work during dev (Vite proxy).
+const API_BASE = ((import.meta as any).env?.VITE_API_URL || '').replace(/\/$/, '');
 
 type FetchError = {
     status: number;
@@ -46,13 +48,14 @@ async function request(path: string, opts: RequestInit = {}) {
     return body;
 }
 
-export const getJson = (path: string) => request(path, { method: 'GET' });
-export const postJson = (path: string, data: unknown) =>
-    request(path, { method: 'POST', body: JSON.stringify(data) });
-export const putJson = (path: string, data: unknown) =>
-    request(path, { method: 'PUT', body: JSON.stringify(data) });
-export const delJson = (path: string) =>
-    request(path, { method: 'DELETE' });
+export const getJson = async <T = unknown>(path: string): Promise<T> =>
+    (await request(path, { method: 'GET' })) as T;
+export const postJson = async <T = unknown>(path: string, data: unknown): Promise<T> =>
+    (await request(path, { method: 'POST', body: JSON.stringify(data) })) as T;
+export const putJson = async <T = unknown>(path: string, data: unknown): Promise<T> =>
+    (await request(path, { method: 'PUT', body: JSON.stringify(data) })) as T;
+export const delJson = async <T = unknown>(path: string): Promise<T> =>
+    (await request(path, { method: 'DELETE' })) as T;
 
 // Auth helpers
 export function signup(data: { name: string; email: string; password: string; role: string }) {
