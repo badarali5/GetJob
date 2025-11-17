@@ -2,7 +2,7 @@ const API_BASE = (process.env.REACT_APP_API_URL || '').replace(/\/$/, '');
 
 type FetchError = {
     status: number;
-    body: any;
+    body: unknown;
 };
 
 async function request(path: string, opts: RequestInit = {}) {
@@ -10,8 +10,23 @@ async function request(path: string, opts: RequestInit = {}) {
     const url = API_BASE ? `${API_BASE}${path}` : path;
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        ...(opts.headers as Record<string, string> || {}),
     };
+
+    // Merge any provided headers (Headers | [string, string][] | Record<string,string>)
+    const optsHeaders = opts.headers;
+    if (optsHeaders) {
+        if (optsHeaders instanceof Headers) {
+            optsHeaders.forEach((value, key) => {
+                headers[key] = value;
+            });
+        } else if (Array.isArray(optsHeaders)) {
+            optsHeaders.forEach(([key, value]) => {
+                headers[key] = value;
+            });
+        } else {
+            Object.assign(headers, optsHeaders as Record<string, string>);
+        }
+    }
 
     const token = localStorage.getItem('token');
     if (token) {
@@ -19,23 +34,22 @@ async function request(path: string, opts: RequestInit = {}) {
     }
 
     const res = await fetch(url, { ...opts, headers, credentials: 'include' });
-    let body: any = null;
+    let body: unknown = null;
     try {
         body = await res.json();
-    } catch (e) {
+    } catch (_e) {
         body = null;
     }
     if (!res.ok) {
-        const err: FetchError = { status: res.status, body };
-        throw err;
+        throw { status: res.status, body } as FetchError;
     }
     return body;
 }
 
 export const getJson = (path: string) => request(path, { method: 'GET' });
-export const postJson = (path: string, data: any) =>
+export const postJson = (path: string, data: unknown) =>
     request(path, { method: 'POST', body: JSON.stringify(data) });
-export const putJson = (path: string, data: any) =>
+export const putJson = (path: string, data: unknown) =>
     request(path, { method: 'PUT', body: JSON.stringify(data) });
 export const delJson = (path: string) =>
     request(path, { method: 'DELETE' });
