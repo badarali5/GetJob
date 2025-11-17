@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { postJson, setToken } from "@/lib/api";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -51,27 +52,23 @@ const Signup = () => {
       name: "",
       email: "",
       password: "",
+      role: "OTHER",
     },
   });
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await postJson("/api/auth/signup", data) as {
+        token?: string;
+        [key: string]: unknown;
+      };
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Signup failed");
+      if (!result || !result.token) {
+        throw new Error("Signup failed");
       }
 
-      const result = await response.json();
-      localStorage.setItem("authToken", result.token);
+      setToken(result.token);
       localStorage.setItem("user", JSON.stringify(result));
 
       toast({

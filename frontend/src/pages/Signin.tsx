@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { postJson, setToken } from "@/lib/api";
 
 const signinSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -45,21 +46,16 @@ const Signin = () => {
   const onSubmit = async (data: SigninFormData) => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/api/auth/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await postJson("/api/auth/signin", data) as {
+        token?: string;
+        [key: string]: unknown;
+      };
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Signin failed");
+      if (!result || !result.token) {
+        throw new Error("Signin failed");
       }
 
-      const result = await response.json();
-      localStorage.setItem("authToken", result.token);
+      setToken(result.token);
       localStorage.setItem("user", JSON.stringify(result));
 
       toast({
