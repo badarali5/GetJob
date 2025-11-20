@@ -1,19 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Briefcase } from "lucide-react";
-import heroImage from "@/assets/hero-image.jpg";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [workplace, setWorkplace] = useState('');
+  const [jobType, setJobType] = useState('');
+  const [salary, setSalary] = useState('');
+  const navigate = useNavigate();
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-accent via-background to-background">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
-      <div className="container mx-auto px-4 py-20 md:py-28">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 animate-fade-in">
+      {/* full viewport width content */}
+      <div className="w-full px-4 py-24 md:py-32">
+        <div className="grid lg:grid-cols-2 gap-8 items-center max-w-[1300px] mx-auto">
+          <div className="space-y-6 animate-fade-in">
             <div className="inline-block">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -22,55 +30,98 @@ const Hero = () => {
               </span>
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
               Kickstart Your Career
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-2xl text-muted-foreground max-w-2xl">
               Find internships & first jobs that fit you perfectly. Start your journey to success today.
             </p>
 
-            <div className="bg-card rounded-2xl p-4 shadow-xl border space-y-3">
-              <div className="grid md:grid-cols-3 gap-3">
-                <div className="relative flex items-center md:col-span-1">
-                  <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Job title or keyword" 
-                    className="pl-9 h-12 bg-background"
-                  />
-                </div>
-                
-                <Select>
-                  <SelectTrigger className="h-12 bg-background">
-                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Location" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    <SelectItem value="remote">Remote</SelectItem>
-                    <SelectItem value="new-york">New York</SelectItem>
-                    <SelectItem value="san-francisco">San Francisco</SelectItem>
-                    <SelectItem value="london">London</SelectItem>
-                    <SelectItem value="tokyo">Tokyo</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="w-full -mx-4 md:-mx-8">
+              <div className="mx-auto w-full max-w-none">
+                <div className="bg-card rounded-2xl p-6 shadow-xl border w-full">
+                  <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="Keywords..."
+                        className="pl-14 pr-4 h-14 bg-background text-lg"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                      />
+                    </div>
 
-                <Select>
-                  <SelectTrigger className="h-12 bg-background">
-                    <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Job Type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    <SelectItem value="internship">Internship</SelectItem>
-                    <SelectItem value="full-time">Full-time</SelectItem>
-                    <SelectItem value="part-time">Part-time</SelectItem>
-                    <SelectItem value="contract">Contract</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <div className="relative mt-3 md:mt-0 md:w-96">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="Location"
+                        className="pl-14 pr-4 h-14 bg-background text-lg"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="mt-3 md:mt-0 md:ml-3 md:flex-shrink-0">
+                      <Button
+                        variant="hero"
+                        size="lg"
+                        className="h-14 px-6 text-lg"
+                        onClick={() => navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}`)}
+                      >
+                        <Search className="h-5 w-5 mr-2" />
+                        Search
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <button
+                      className={`px-3 py-1 rounded-md text-sm ${workplace === 'remote' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
+                      onClick={() => {
+                        const next = workplace === 'remote' ? '' : 'remote';
+                        setWorkplace(next);
+                        navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}&workplace=${encodeURIComponent(next)}&type=${encodeURIComponent(jobType)}&salary=${encodeURIComponent(salary)}`);
+                      }}
+                    >
+                      <span className="sr-only">Workplace</span>
+                      Workplace
+                    </button>
+
+                    <button
+                      className={`px-3 py-1 rounded-md text-sm flex items-center gap-2 ${jobType === 'internship' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
+                      onClick={() => {
+                        const next = jobType === 'internship' ? '' : 'internship';
+                        setJobType(next);
+                        navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}&workplace=${encodeURIComponent(workplace)}&type=${encodeURIComponent(next)}&salary=${encodeURIComponent(salary)}`);
+                      }}
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      Type
+                    </button>
+
+                    <button
+                      className={`px-3 py-1 rounded-md text-sm ${salary === 'any' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
+                      onClick={() => {
+                        const next = salary === 'any' ? '' : 'any';
+                        setSalary(next);
+                        navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}&workplace=${encodeURIComponent(workplace)}&type=${encodeURIComponent(jobType)}&salary=${encodeURIComponent(next)}`);
+                      }}
+                    >
+                      Salary
+                    </button>
+
+                    <button className="px-3 py-1 rounded-md text-sm bg-card/60 text-muted-foreground border" onClick={() => { setTitle(''); setLocation(''); setWorkplace(''); setJobType(''); setSalary(''); navigate('/jobs'); }}>
+                      Anytime
+                    </button>
+
+                    {location && (
+                      <span className="ml-auto md:ml-0 bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">
+                        {location}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              
-              <Button variant="hero" size="lg" className="w-full">
-                <Search className="h-4 w-4 mr-2" />
-                Search Jobs
-              </Button>
             </div>
 
             <p className="text-sm text-muted-foreground">
@@ -80,17 +131,7 @@ const Hero = () => {
             </p>
           </div>
 
-          <div className="hidden lg:block animate-slide-up">
-            <div className="relative">
-              <div className="absolute inset-0 gradient-hero blur-3xl opacity-20 rounded-3xl"></div>
-              <img 
-                src={heroImage}
-                alt="Young professionals collaborating" 
-                className="relative rounded-3xl shadow-2xl w-full h-auto object-cover"
-              />
-            </div>
-          </div>
-        </div>
+         </div>
       </div>
     </section>
   );

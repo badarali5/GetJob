@@ -17,10 +17,6 @@ public class JobController {
     @Autowired
     private JobRepository repo;
 
-    @GetMapping
-    public List<Job> getAll() {
-        return repo.findAll();
-    }
 
     @GetMapping("/sync")
     public String syncJobs() {
@@ -32,7 +28,6 @@ public class JobController {
     public ResponseEntity<Job> postJob(@RequestBody Job job) {
         return ResponseEntity.ok(jobService.postJob(job));
     }
-
     @GetMapping
     public ResponseEntity<List<Job>> getJobs() {
         return ResponseEntity.ok(jobService.getJobs());

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import JobCard from "@/components/JobCard";
@@ -7,66 +8,132 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Sample job data
-const sampleJobs = [
-  {
-    id: "1",
-    title: "Frontend Developer Intern",
-    company: "TechCorp",
-    location: "San Francisco, CA",
-    type: "Internship",
-    postedDate: "2 days ago",
-    tags: ["React", "TypeScript", "UI/UX"],
-  },
-  {
-    id: "2",
-    title: "Marketing Coordinator",
-    company: "GrowthHub",
-    location: "Remote",
-    type: "Full-time",
-    postedDate: "1 week ago",
-    tags: ["Digital Marketing", "SEO", "Content"],
-  },
-  {
-    id: "3",
-    title: "Data Analyst Intern",
-    company: "DataWorks",
-    location: "New York, NY",
-    type: "Internship",
-    postedDate: "3 days ago",
-    tags: ["Python", "SQL", "Analytics"],
-  },
-  {
-    id: "4",
-    title: "Product Designer",
-    company: "DesignLab",
-    location: "Remote",
-    type: "Full-time",
-    postedDate: "5 days ago",
-    tags: ["Figma", "UI/UX", "Prototyping"],
-  },
-  {
-    id: "5",
-    title: "Software Engineering Intern",
-    company: "StartupXYZ",
-    location: "Austin, TX",
-    type: "Internship",
-    postedDate: "1 day ago",
-    tags: ["JavaScript", "Node.js", "MongoDB"],
-  },
-  {
-    id: "6",
-    title: "Business Analyst",
-    company: "ConsultPro",
-    location: "Chicago, IL",
-    type: "Full-time",
-    postedDate: "4 days ago",
-    tags: ["Excel", "Strategy", "Analytics"],
-  },
-];
+import { getJson } from "@/lib/api";
+
+// shape returned by backend /jobs
+type BackendJob = {
+  id: number | string;
+  title?: string;
+  companyName?: string;
+  location?: string;
+  jobType?: string;
+  postedAt?: string | null;
+  createdAt?: string | null;
+  description?: string;
+  salaryRange?: string;
+};
+
+function timeAgo(dateLike?: string | null) {
+  if (!dateLike) return '';
+  const d = new Date(dateLike);
+  if (isNaN(d.getTime())) return '';
+  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 52) return `${weeks}w ago`;
+  const years = Math.floor(days / 365);
+  return `${years}y ago`;
+}
 
 const Jobs = () => {
   const [showFilters, setShowFilters] = useState(false);
+  const [jobs, setJobs] = useState<BackendJob[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loc, setLoc] = useState('');
+  const [workplace, setWorkplace] = useState('');
+  const [jobTypeFilter, setJobTypeFilter] = useState('');
+  const [salaryFilter, setSalaryFilter] = useState('');
+  const locationHook = useLocation();
+  const navigate = useNavigate();
+
+  const fetchJobs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getJson<BackendJob[]>('/jobs');
+      // apply filters client-side if provided
+      let results = data || [];
+      if (loc && loc.trim() !== '') {
+        results = results.filter(j => (j.location || '').toLowerCase().includes(loc.toLowerCase()));
+      }
+      if (workplace && workplace.trim() !== '') {
+        if (workplace === 'remote') {
+          results = results.filter(j => (j.location || '').toLowerCase().includes('remote'));
+        }
+      }
+      if (jobTypeFilter && jobTypeFilter.trim() !== '') {
+        results = results.filter(j => (j.jobType || '').toLowerCase().includes(jobTypeFilter.toLowerCase()));
+      }
+      if (salaryFilter && salaryFilter.trim() !== '') {
+        results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(salaryFilter.toLowerCase()));
+      }
+      setJobs(results);
+    } catch (err: any) {
+      console.error('Failed to fetch jobs', err);
+      setError(err?.message || 'Failed to fetch jobs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchJobs = async (title: string, locationFilter?: string, filters?: { workplace?: string; jobType?: string; salary?: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const path = title && title.trim() !== '' ? `/jobs/search?title=${encodeURIComponent(title)}` : '/jobs';
+      const data = await getJson<BackendJob[]>(path);
+      let results = data || [];
+      if (locationFilter && locationFilter.trim() !== '') {
+        results = results.filter(j => (j.location || '').toLowerCase().includes(locationFilter.toLowerCase()));
+      }
+      if (filters?.workplace) {
+        if (filters.workplace === 'remote') {
+          results = results.filter(j => (j.location || '').toLowerCase().includes('remote'));
+        }
+      }
+      if (filters?.jobType) {
+        results = results.filter(j => (j.jobType || '').toLowerCase().includes(filters.jobType.toLowerCase()));
+      }
+      if (filters?.salary) {
+        results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(filters.salary.toLowerCase()));
+      }
+      setJobs(results);
+    } catch (err: any) {
+      console.error('Search failed', err);
+      setError(err?.message || 'Search failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // read query params q and loc to prefill search
+    const params = new URLSearchParams(locationHook.search);
+    const q = params.get('q') || '';
+    const l = params.get('loc') || '';
+    const wp = params.get('workplace') || '';
+    const jt = params.get('type') || '';
+    const sal = params.get('salary') || '';
+    setSearchTerm(q);
+    setLoc(l);
+    setWorkplace(wp);
+    setJobTypeFilter(jt);
+    setSalaryFilter(sal);
+    if (q || l || wp || jt || sal) {
+      void searchJobs(q, l, { workplace: wp, jobType: jt, salary: sal });
+    } else {
+      void fetchJobs();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationHook.search]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -82,27 +149,38 @@ const Jobs = () => {
               <div className="grid md:grid-cols-4 gap-3">
                 <div className="relative flex items-center md:col-span-2">
                   <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Job title, keyword, or company" 
+                  <Input
+                    placeholder="Job title, keyword, or company"
                     className="pl-9 h-12 bg-background"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void searchJobs(searchTerm);
+                      }
+                    }}
                   />
                 </div>
                 
-                <Select>
-                  <SelectTrigger className="h-12 bg-background">
-                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Location" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    <SelectItem value="all">All Locations</SelectItem>
-                    <SelectItem value="remote">Remote</SelectItem>
-                    <SelectItem value="new-york">New York</SelectItem>
-                    <SelectItem value="san-francisco">San Francisco</SelectItem>
-                    <SelectItem value="chicago">Chicago</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <MapPin className="absolute left-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Location (city, remote)"
+                    className="pl-9 h-12 bg-background"
+                    value={loc}
+                    onChange={(e) => setLoc(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        // navigate to include query params
+                        navigate(`/jobs?q=${encodeURIComponent(searchTerm)}&loc=${encodeURIComponent(loc)}`);
+                      }
+                    }}
+                  />
+                </div>
 
-                <Button variant="hero" size="lg" className="h-12">
+                <Button variant="hero" size="lg" className="h-12" onClick={() => { navigate(`/jobs?q=${encodeURIComponent(searchTerm)}&loc=${encodeURIComponent(loc)}`); void searchJobs(searchTerm, loc); }}>
                   <Search className="h-4 w-4 mr-2" />
                   Search
                 </Button>
@@ -160,23 +238,69 @@ const Jobs = () => {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-6">
                   <p className="text-muted-foreground">
-                    Showing <span className="font-semibold text-foreground">{sampleJobs.length}</span> opportunities
+                    Showing <span className="font-semibold text-foreground">{jobs.length}</span> opportunities
                   </p>
                   
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="lg:hidden"
-                    onClick={() => setShowFilters(!showFilters)}
-                  >
-                    <SlidersHorizontal className="h-4 w-4 mr-2" />
-                    Filters
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={async () => {
+                        // Trigger backend sync (JSearch) then refresh
+                        try {
+                          setLoading(true);
+                          await getJson<string>('/jobs/sync');
+                          await fetchJobs();
+                        } catch (e) {
+                          console.error(e);
+                          setError('Sync failed');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                    >
+                      {loading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" />
+                          Syncing
+                        </div>
+                      ) : (
+                        'Sync jobs'
+                      )}
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="lg:hidden"
+                      onClick={() => setShowFilters(!showFilters)}
+                    >
+                      <SlidersHorizontal className="h-4 w-4 mr-2" />
+                      Filters
+                    </Button>
+                  </div>
                 </div>
 
+                {loading && (
+                  <div className="p-6 flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" />
+                    <span>Loading jobs...</span>
+                  </div>
+                )}
+                {error && <div className="p-6 text-destructive">{error}</div>}
+
                 <div className="grid gap-6">
-                  {sampleJobs.map((job) => (
-                    <JobCard key={job.id} {...job} />
+                  {jobs.map((job) => (
+                    <JobCard
+                      key={String(job.id)}
+                      id={String(job.id)}
+                      title={job.title || 'Untitled'}
+                      company={job.companyName || 'Unknown'}
+                      location={job.location || 'Remote'}
+                      type={job.jobType || 'N/A'}
+                      postedDate={job.postedAt ? timeAgo(job.postedAt) : (job.createdAt ? timeAgo(job.createdAt) : '')}
+                      tags={[]}
+                    />
                   ))}
                 </div>
               </div>

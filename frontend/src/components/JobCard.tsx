@@ -34,7 +34,7 @@ const JobCard = ({ id, title, company, location, type, postedDate, logo, tags = 
             )}
             
             <div className="space-y-1">
-              <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
+              <h3 className="font-semibold text-xl group-hover:text-primary transition-colors">
                 {title}
               </h3>
               <p className="text-sm text-muted-foreground">{company}</p>
