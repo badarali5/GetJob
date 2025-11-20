@@ -1,7 +1,6 @@
 package com.example.GetJob.user;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -19,36 +17,49 @@ import org.springframework.beans.factory.annotation.Value;
 public class JobService {
 
     private final JobRepository jobRepository;
+
     @Autowired
     public JobService(JobRepository jobRepository) {
         this.jobRepository = jobRepository;
     }
 
-    @Value("${jobs.api.key}")
+    @Value("${jsearch.api.key}")
     private String apiKey;
 
-    private final RestTemplate rest = new RestTemplate();
-    public void fetchJobs() {
-        String url = "https://api.adzuna.com/v1/api/jobs/pk/search/1?" +
-                     "app_id=YOUR_ID&app_key=" + apiKey + "&results_per_page=50";
+    @Value("${jsearch.api.host}")
+    private String apiHost;
 
-        ResponseEntity<String> res = rest.getForEntity(url, String.class);
+    private final RestTemplate rest = new RestTemplate();
+
+
+    public void fetchJobs() {
+
+        String url = "https://jsearch.p.rapidapi.com/search?query=software%20developer&num_pages=1";
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set("X-RapidAPI-Key", apiKey);
+        headers.set("X-RapidAPI-Host", apiHost);
+
+        org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+
+        ResponseEntity<String> res = rest.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(res.getBody());
-            JsonNode results = root.path("results");
+            JsonNode results = root.path("data");
+
             if (results.isArray()) {
                 for (JsonNode j : results) {
                     Job job = new Job();
-                    job.setTitle(j.path("title").asText(null));
-                    // company is a nested object in the API; we skip creating Company entity here
-                    job.setLocation(j.path("location").path("display_name").asText(null));
-                    job.setDescription(j.path("description").asText(null));
-                    String salaryMin = j.path("salary_min").asText("");
-                    String salaryMax = j.path("salary_max").asText("");
-                    if (!salaryMin.isEmpty() || !salaryMax.isEmpty()) {
-                        job.setSalaryRange((salaryMin + " - " + salaryMax).trim());
-                    }
+
+                    job.setTitle(j.path("job_title").asText(null));
+                    job.setCompanyName(j.path("employer_name").asText(null));
+                    job.setLocation(j.path("job_city").asText(null));
+                    job.setDescription(j.path("job_description").asText(null));
+                    job.setSalaryRange(j.path("job_salary_currency").asText("") 
+                                       + " " + j.path("job_salary").asText(""));
+
                     jobRepository.save(job);
                 }
             }
@@ -57,28 +68,23 @@ public class JobService {
         }
     }
 
-    @Scheduled(fixedRate = 43200000)  
+
+    @Scheduled(fixedRate = 43200000)
     public void syncJobs() {
         fetchJobs();
-    }
-
-
-    public Job postJob(Job job) {
-        return jobRepository.save(job);
     }
 
     public List<Job> getJobs() {
         return jobRepository.findAll();
     }
 
-
-
+    public Job postJob(Job job) {
+        return jobRepository.save(job);
+    }
 
     public List<Job> searchJobs(String title) {
         return jobRepository.findByTitleContainingIgnoreCase(title);
     }
-    @Transactional
-    void deleteJob(Job job) {
-        jobRepository.delete(job);
-    }
+
 }
+
