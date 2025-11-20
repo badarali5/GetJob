@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -21,19 +20,28 @@ public class Job {
     private Long id;
 
     private String title;
-    private String companyName;
+
+    // location as provided by the external API
     private String location;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
     private String salaryRange;
+
+    // jobType / type of job
     private String jobType;
 
     @Column(columnDefinition = "TEXT")
     private String applyUrl;
 
     private String source;
-    private Timestamp postedAt;
-    private Timestamp createdAt;
+
+    // store posted timestamp as LocalDateTime
+    private LocalDateTime postedAt;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "company_name")
+    private String companyName;
 }
