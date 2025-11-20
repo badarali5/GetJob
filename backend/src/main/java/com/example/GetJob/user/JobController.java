@@ -1,6 +1,5 @@
 package com.example.GetJob.user;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -14,6 +13,15 @@ public class JobController {
     public JobController(JobService jobService) {
         this.jobService = jobService;
     }
+
+    @Autowired
+    private JobRepository repo;
+
+    @GetMapping
+    public List<Job> getAll() {
+        return repo.findAll();
+    }
+    
     @PostMapping("/post")
     public ResponseEntity<Job> postJob(@RequestBody Job job) {
         return ResponseEntity.ok(jobService.postJob(job));

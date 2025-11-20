@@ -4,11 +4,11 @@ import { Briefcase } from "lucide-react";
 
 const Navbar = () => {
   return (
-    <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Briefcase className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+    <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-80">
+      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Briefcase className="h-8 w-8 text-primary" />
+          <span className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
             GetJob
           </span>
         </Link>
@@ -17,7 +17,7 @@ const Navbar = () => {
           <Link to="/jobs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             Browse Jobs
           </Link>
-          <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             How It Works
           </Link>
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
@@ -25,14 +25,14 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Link to="/signin">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="lg">
               Sign In
             </Button>
           </Link>
           <Link to="/signup">
-            <Button variant="hero" size="sm">
+            <Button variant="hero" size="lg">
               Get Started
             </Button>
           </Link>

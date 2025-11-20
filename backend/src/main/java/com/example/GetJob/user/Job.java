@@ -1,5 +1,9 @@
 package com.example.GetJob.user;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,22 +11,29 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "job")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Job {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
 
-        private String title;
-        private String type;
-        private String description;
-        private String skillsRequired;
-        private String location;
-        private String salaryRange;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        private LocalDate deadline;
-        private LocalDateTime createdAt = LocalDateTime.now();
+    private String title;
+    private String companyName;
+    private String location;
 
-        @ManyToOne
-        @JoinColumn(name = "company_id")
-        private Company company;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private String salaryRange;
+    private String jobType;
+
+    @Column(columnDefinition = "TEXT")
+    private String applyUrl;
+
+    private String source;
+    private Timestamp postedAt;
+    private Timestamp createdAt;
 }
