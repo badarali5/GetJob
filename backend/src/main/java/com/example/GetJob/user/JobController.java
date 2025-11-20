@@ -21,7 +21,13 @@ public class JobController {
     public List<Job> getAll() {
         return repo.findAll();
     }
-    
+
+    @GetMapping("/sync")
+    public String syncJobs() {
+        jobService.fetchJobs();
+        return "Jobs fetched from JSearch!";
+    }
+
     @PostMapping("/post")
     public ResponseEntity<Job> postJob(@RequestBody Job job) {
         return ResponseEntity.ok(jobService.postJob(job));
