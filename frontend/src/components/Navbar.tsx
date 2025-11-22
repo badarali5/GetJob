@@ -14,13 +14,13 @@ const Navbar = () => {
         </Link>
         
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/jobs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/jobs" className="text-md font-medium text-muted-foreground hover:text-foreground transition-colors">
             Browse Jobs
           </Link>
-          <Link to="/#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/#how-it-works" className="text-md font-medium text-muted-foreground hover:text-foreground transition-colors">
             How It Works
           </Link>
-          <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/" className="text-md font-medium text-muted-foreground hover:text-foreground transition-colors">
             For Employers
           </Link>
         </div>
