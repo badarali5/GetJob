@@ -1,5 +1,7 @@
 package com.example.GetJob.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +27,9 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 if (allowedOrigins != null && !allowedOrigins.trim().isEmpty()) {
-                    String[] origins = allowedOrigins.split(",");
+                    String[] origins = Arrays.stream(allowedOrigins.split(","))
+                            .map(String::trim)
+                            .toArray(String[]::new);
                     registry.addMapping("/**")
                             .allowedOrigins(origins)
                             .allowedMethods("*")
