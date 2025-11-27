@@ -1,44 +1,38 @@
 package com.example.GetJob.user;
 
+import java.util.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.http.ResponseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
+
+
 
 @Service
 public class JobService {
 
-    private static final Logger logger = LoggerFactory.getLogger(JobService.class);
-
     private final JobRepository jobRepository;
 
+    @Autowired
     public JobService(JobRepository jobRepository) {
         this.jobRepository = jobRepository;
     }
 
-    @Value("${jsearch.api.key:}")
+    @Value("${jsearch.api.key}")
     private String apiKey;
 
-    @Value("${jsearch.api.host:}")
+    @Value("${jsearch.api.host}")
     private String apiHost;
 
     private final RestTemplate rest = new RestTemplate();
 
-    /**
-     * Fetch jobs from JSearch and persist them.
-     * Throws on fatal errors so callers (controllers) can surface the failure.
-     */
-    public void fetchJobs() throws Exception {
-        if (apiKey == null || apiKey.isBlank() || apiHost == null || apiHost.isBlank()) {
-            throw new IllegalStateException("Missing JSearch API key/host configuration (jsearch.api.key / jsearch.api.host).");
-        }
+
+    public void fetchJobs() {
 
         String url = "https://jsearch.p.rapidapi.com/search?query=software%20developer&num_pages=1";
 
@@ -49,45 +43,63 @@ public class JobService {
         org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
 
         ResponseEntity<String> res = rest.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
-        int status = res.getStatusCodeValue();
-        logger.info("JSearch request returned status {}", status);
 
-        if (!res.getStatusCode().is2xxSuccessful()) {
-            String body = res.getBody();
-            logger.error("JSearch returned non-success: {} body: {}", status, body);
-            throw new RuntimeException("JSearch request failed with status " + status + " body: " + (body == null ? "" : body));
-        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(res.getBody());
+            JsonNode results = root.path("data");
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(res.getBody());
-        JsonNode results = root.path("data");
+            if (results.isArray()) {
+                for (JsonNode j : results) {
+                    Job job = new Job();
 
-        if (results.isArray()) {
-            int saved = 0;
-            for (JsonNode j : results) {
-                Job job = new Job();
-                job.setTitle(j.path("job_title").asText(null));
-                job.setCompanyName(j.path("employer_name").asText(null));
-                job.setLocation(j.path("job_city").asText(null));
-                job.setDescription(j.path("job_description").asText(null));
-                job.setSalaryRange(j.path("job_salary_currency").asText("") + " " + j.path("job_salary").asText(""));
-                job.setSource("jsearch");
-                jobRepository.save(job);
-                saved++;
+                    String title = j.path("job_title").asText(null);
+                    String employer = j.path("employer_name").asText(null);
+                    String city = j.path("job_city").asText(null);
+
+                    job.setTitle(title);
+                    job.setCompanyName(employer);
+                    job.setLocation(city);
+                    job.setDescription(j.path("job_description").asText(null));
+                    job.setSalaryRange(j.path("job_salary_currency").asText("") + " " + j.path("job_salary").asText(""));
+                    job.setSource("jsearch");
+
+                    // try to parse posted_at if present
+                    if (j.hasNonNull("job_posted_at")) {
+                        try {
+                            String posted = j.path("job_posted_at").asText(null);
+                            if (posted != null && !posted.isEmpty()) {
+                                // Many APIs return ISO-8601-like strings; try parsing
+                                java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(posted);
+                                job.setPostedAt(odt.toLocalDateTime());
+                            }
+                        } catch (Exception ex) {
+                            // ignore parse errors
+                        }
+                    }
+
+                    // avoid duplicates (title + company + location)
+                    try {
+                        Optional<Job> existing = jobRepository.findExisting(title == null ? "" : title, employer == null ? "" : employer, city == null ? "" : city);
+                        if (existing.isPresent()) {
+                            continue; // skip saving duplicate
+                        }
+                    } catch (Exception ex) {
+                        // if the query fails for any reason, fall back to saving
+                    }
+
+                    jobRepository.save(job);
+                }
             }
-            logger.info("Saved {} jobs from JSearch", saved);
-        } else {
-            logger.warn("JSearch returned no 'data' array or it is not an array");
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
+
     @Scheduled(fixedRate = 43200000)
     public void syncJobs() {
-        try {
-            fetchJobs();
-        } catch (Exception ex) {
-            logger.error("Scheduled syncJobs failed", ex);
-        }
+        fetchJobs();
     }
 
     public List<Job> getJobs() {
@@ -109,7 +121,7 @@ public class JobService {
         try {
             return fetchJobsForQuery(title);
         } catch (Exception ex) {
-            logger.error("Dynamic search via JSearch failed for '{}'", title, ex);
+            ex.printStackTrace();
             return Collections.emptyList();
         }
     }
@@ -131,31 +143,53 @@ public class JobService {
 
         ResponseEntity<String> res = rest.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
 
-        if (!res.getStatusCode().is2xxSuccessful()) {
-            logger.error("JSearch dynamic search failed with status {} body {}", res.getStatusCodeValue(), res.getBody());
-            throw new RuntimeException("JSearch dynamic search failed with status " + res.getStatusCodeValue());
-        }
-
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(res.getBody());
         JsonNode results = root.path("data");
         List<Job> saved = new ArrayList<>();
         if (results.isArray()) {
             for (JsonNode j : results) {
+                String title = j.path("job_title").asText(null);
+                String employer = j.path("employer_name").asText(null);
+                String city = j.path("job_city").asText(null);
+
+                // avoid duplicates
+                try {
+                    Optional<Job> existing = jobRepository.findExisting(title == null ? "" : title, employer == null ? "" : employer, city == null ? "" : city);
+                    if (existing.isPresent()) {
+                        saved.add(existing.get());
+                        continue;
+                    }
+                } catch (Exception ex) {
+                    // ignore and continue
+                }
+
                 Job job = new Job();
-                job.setTitle(j.path("job_title").asText(null));
-                job.setCompanyName(j.path("employer_name").asText(null));
-                job.setLocation(j.path("job_city").asText(null));
+                job.setTitle(title);
+                job.setCompanyName(employer);
+                job.setLocation(city);
                 job.setDescription(j.path("job_description").asText(null));
                 job.setSalaryRange(j.path("job_salary_currency").asText("") + " " + j.path("job_salary").asText(""));
                 job.setSource("jsearch");
+
+                if (j.hasNonNull("job_posted_at")) {
+                    try {
+                        String posted = j.path("job_posted_at").asText(null);
+                        if (posted != null && !posted.isEmpty()) {
+                            java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(posted);
+                            job.setPostedAt(odt.toLocalDateTime());
+                        }
+                    } catch (Exception ex) {
+                        // ignore parse errors
+                    }
+                }
+
                 Job persisted = jobRepository.save(job);
                 saved.add(persisted);
             }
-            logger.info("Saved {} jobs from dynamic JSearch for query '{}'", saved.size(), query);
-        } else {
-            logger.warn("JSearch dynamic search returned no 'data' array for query '{}'", query);
         }
         return saved;
     }
+
 }
+
