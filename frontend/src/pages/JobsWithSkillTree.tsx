@@ -232,7 +232,14 @@ const Jobs = () => {
                   />
                 </div>
 
-                <Button variant="hero" size="lg" className="h-12" onClick={() => { navigate(`/jobs?q=${encodeURIComponent(searchTerm)}&loc=${encodeURIComponent(loc)}`); }}>
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  className="h-12"
+                  onClick={() => {
+                    navigate(`/jobs?q=${encodeURIComponent(searchTerm)}&loc=${encodeURIComponent(loc)}`);
+                  }}
+                >
                   <Search className="h-4 w-4 mr-2" />
                   Search
                 </Button>
@@ -318,23 +325,6 @@ const Jobs = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Category</label>
-                    <Select>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover">
-                        <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="tech">Technology</SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="design">Design</SelectItem>
-                        <SelectItem value="business">Business</SelectItem>
-                        <SelectItem value="engineering">Engineering</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </aside>
 
@@ -350,7 +340,6 @@ const Jobs = () => {
                       variant="secondary"
                       size="sm"
                       onClick={async () => {
-                        // Trigger backend sync (JSearch) then refresh
                         try {
                           setLoading(true);
                           await getJson<string>('/jobs/sync');
