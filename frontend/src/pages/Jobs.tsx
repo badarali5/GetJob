@@ -96,25 +96,31 @@ const Jobs = () => {
       
       let results = data || [];
       
-      // Build AVL Tree for skill-based indexing
-      const tree = new AVLTree<BackendJob>();
-      results.forEach(job => {
-        const skills = job.skills && job.skills.length > 0 
-          ? job.skills 
-          : extractSkillsFromJob(job);
-        skills.forEach(skill => {
-          tree.insert(skill, job);
+      if (results.length > 0) {
+        // Build AVL Tree for skill-based indexing
+        const tree = new AVLTree<BackendJob>();
+        results.forEach(job => {
+          const skills = job.skills && job.skills.length > 0 
+            ? job.skills 
+            : extractSkillsFromJob(job);
+          skills.forEach(skill => {
+            tree.insert(skill, job);
+          });
         });
-      });
+        
+        setSkillTree(tree);
+        setAllSkills(tree.getAllSkills());
+      }
       
-      setSkillTree(tree);
-      setAllSkills(tree.getAllSkills());
       setJobs(results);
-      applyFilters(results, '', '', '', '', []);
+      applyFilters(results, '', '', '', '', [], '');
     } catch (err: any) {
       console.error('Failed to fetch jobs', err);
       setError(err?.message || 'Failed to fetch jobs. Make sure the backend is running on port 8081.');
+      setJobs([]);
       setFilteredJobs([]);
+      setSkillTree(null);
+      setAllSkills([]);
     } finally {
       setLoading(false);
     }
