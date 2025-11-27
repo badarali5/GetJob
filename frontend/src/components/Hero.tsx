@@ -68,7 +68,7 @@ const Hero = () => {
                       <Button
                         variant="hero"
                         size="lg"
-                        className="h-20 px-8 text-xl w-full md:w-auto cursor-pointer"
+                        className="h-20 px-8 text-xl w-full md:w-auto cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/50"
                         onClick={() => {
                           // Build URL with non-empty parameters only
                           const params = new URLSearchParams();
