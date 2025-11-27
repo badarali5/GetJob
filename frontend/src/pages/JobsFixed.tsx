@@ -24,6 +24,100 @@ type BackendJob = {
   skills?: string[];
 };
 
+// --- Salary helpers: parse, merge sort, binary search ---
+function parseSalaryToNumber(s?: string): number | null {
+  if (!s) return null;
+  // Normalize: remove currency symbols, commas
+  const cleaned = s.replace(/[$,]/g, '').trim();
+  // Handle ranges like "60k - 80k" or "60k-80k" or "60000-80000"
+  const rangeMatch = cleaned.match(/(\d+[\d\.]*)\s*(k|m)?\s*(?:-|to)\s*(\d+[\d\.]*)\s*(k|m)?/i);
+  if (rangeMatch) {
+    const a = Number(rangeMatch[1]);
+    const aSuffix = (rangeMatch[2] || '').toLowerCase();
+    const b = Number(rangeMatch[3]);
+    const bSuffix = (rangeMatch[4] || '').toLowerCase();
+    const mulA = aSuffix === 'k' ? 1000 : aSuffix === 'm' ? 1000000 : 1;
+    const mulB = bSuffix === 'k' ? 1000 : bSuffix === 'm' ? 1000000 : 1;
+    const val = ((a * mulA) + (b * mulB)) / 2; // average
+    return Number.isFinite(val) ? val : null;
+  }
+
+  // Single number with optional suffix
+  const singleMatch = cleaned.match(/(\d+[\d\.]*)\s*(k|m)?/i);
+  if (singleMatch) {
+    const num = Number(singleMatch[1]);
+    const suffix = (singleMatch[2] || '').toLowerCase();
+    const mul = suffix === 'k' ? 1000 : suffix === 'm' ? 1000000 : 1;
+    const val = num * mul;
+    return Number.isFinite(val) ? val : null;
+  }
+
+  return null;
+}
+
+function getJobSalaryValue(job: BackendJob): number | null {
+  // Prefer explicit salaryRange; fallback: try to extract from description/title
+  const v = parseSalaryToNumber(job.salaryRange || undefined);
+  if (v !== null) return v;
+  // attempt to parse from description/title heuristically
+  const combined = `${job.title || ''} ${job.description || ''}`;
+  return parseSalaryToNumber(combined);
+}
+
+function mergeSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
+  if (arr.length <= 1) return arr.slice();
+  const mid = Math.floor(arr.length / 2);
+  const left = mergeSortJobsBySalary(arr.slice(0, mid));
+  const right = mergeSortJobsBySalary(arr.slice(mid));
+  const out: BackendJob[] = [];
+  let i = 0, j = 0;
+  while (i < left.length && j < right.length) {
+    const lv = getJobSalaryValue(left[i]);
+    const rv = getJobSalaryValue(right[j]);
+    // Treat nulls as lesser so they appear first; when filtering by min salary we'll skip them
+    const lnum = lv === null ? -Infinity : lv;
+    const rnum = rv === null ? -Infinity : rv;
+    if (lnum <= rnum) {
+      out.push(left[i++]);
+    } else {
+      out.push(right[j++]);
+    }
+  }
+  while (i < left.length) out.push(left[i++]);
+  while (j < right.length) out.push(right[j++]);
+  return out;
+}
+
+// find first index where job salary >= target. Jobs with null salary are treated as -Infinity and ignored (i.e., they come before target)
+function binarySearchFirstAtLeast(sorted: BackendJob[], target: number): number {
+  let lo = 0;
+  let hi = sorted.length - 1;
+  let ans = sorted.length;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const val = getJobSalaryValue(sorted[mid]);
+    const num = val === null ? -Infinity : val;
+    if (num >= target) {
+      ans = mid;
+      hi = mid - 1;
+    } else {
+      lo = mid + 1;
+    }
+  }
+  return ans;
+}
+
+function filterJobsByMinSalary(jobList: BackendJob[], minSalary: number): BackendJob[] {
+  const sorted = mergeSortJobsBySalary(jobList);
+  const idx = binarySearchFirstAtLeast(sorted, minSalary);
+  // Return slice from idx to end, but exclude those with null salary (they'll be before idx)
+  return sorted.slice(idx).filter(j => {
+    const v = getJobSalaryValue(j);
+    return v !== null && v >= minSalary;
+  });
+}
+
+
 function timeAgo(dateLike?: string | null) {
   if (!dateLike) return '';
   const d = new Date(dateLike);
@@ -142,7 +236,15 @@ const JobsFixed = () => {
     }
 
     if (salaryFilter && salaryFilter.trim() !== '') {
-      results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(salaryFilter.toLowerCase()));
+      // Try to parse the salaryFilter as a numeric minimum (e.g. "80k", "80000", "$80k")
+      const parsed = parseSalaryToNumber(salaryFilter);
+      if (parsed !== null) {
+        // Use merge sort + binary search to efficiently find jobs >= parsed
+        results = filterJobsByMinSalary(results, parsed);
+      } else {
+        // Fallback to substring match if parsing fails
+        results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(salaryFilter.toLowerCase()));
+      }
     }
 
     if (skills.length > 0 && skillTree) {
