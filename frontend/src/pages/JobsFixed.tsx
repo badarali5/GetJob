@@ -442,8 +442,6 @@ const JobsFixed = () => {
       setRecommendationEngine(recEngine);
 
       setJobs(results);
-      // Apply current filters if any
-      applyFilters(results, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
     } catch (err: any) {
       console.error('Failed to fetch jobs', err);
       setError(err?.message || 'Failed to fetch jobs. Make sure the backend is running on port 8081.');
@@ -542,8 +540,7 @@ const JobsFixed = () => {
     if (opts.workplace) setWorkplace(opts.workplace);
     if (opts.jobType) setJobTypeFilter(opts.jobType);
     if (opts.salary) setSalaryFilter(opts.salary);
-    await fetchJobs();
-    applyFilters(jobs, q, l, opts.workplace || '', opts.jobType || '', selectedSkills);
+    // Note: fetchJobs is called via useEffect when URL parameters change
   };
 
   useEffect(() => {
@@ -553,13 +550,24 @@ const JobsFixed = () => {
     const wp = params.get('workplace') || '';
     const jt = params.get('type') || '';
     const sal = params.get('salary') || '';
-    if (q || l || wp || jt || sal) {
-      void searchJobs(q, l, { workplace: wp, jobType: jt, salary: sal });
-    } else {
-      void fetchJobs();
-    }
+    
+    // Update search fields
+    if (q) setSearchTerm(q);
+    if (l) setLoc(l);
+    if (wp) setWorkplace(wp);
+    if (jt) setJobTypeFilter(jt);
+    if (sal) setSalaryFilter(sal);
+    
+    // Always fetch jobs (with or without filters)
+    void fetchJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationHook.search]);
+
+  // Apply filters whenever jobs or filter state changes
+  useEffect(() => {
+    applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobs, searchTerm, loc, workplace, jobTypeFilter, selectedSkills, salaryFilter]);
 
   return (
     <div className="min-h-screen flex flex-col">

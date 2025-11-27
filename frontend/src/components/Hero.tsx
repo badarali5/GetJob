@@ -68,8 +68,11 @@ const Hero = () => {
                       <Button
                         variant="hero"
                         size="lg"
-                        className="h-20 px-8 text-xl"
-                        onClick={() => navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}`)}
+                        className="h-20 px-8 text-xl w-full md:w-auto"
+                        onClick={() => {
+                          const url = `/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}${workplace ? `&workplace=${encodeURIComponent(workplace)}` : ''}${jobType ? `&type=${encodeURIComponent(jobType)}` : ''}${salary ? `&salary=${encodeURIComponent(salary)}` : ''}`;
+                          navigate(url);
+                        }}
                       >
                         <Search className="h-6 w-6 mr-3" />
                         Search
