@@ -15,13 +15,13 @@ public class JobController {
     private static final Logger logger = LoggerFactory.getLogger(JobController.class);
 
     private final JobService jobService;
-    @Autowired
-    public JobController(JobService jobService) {
-        this.jobService = jobService;
-    }
+    private final JobRepository repo;
 
     @Autowired
-    private JobRepository repo;
+    public JobController(JobService jobService, JobRepository repo) {
+        this.jobService = jobService;
+        this.repo = repo;
+    }
 
     @GetMapping("/sync")
     public ResponseEntity<?> syncJobs() {

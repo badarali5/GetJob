@@ -29,16 +29,38 @@ public class JobService {
     @Value("${jsearch.api.host}")
     private String apiHost;
 
+    @Value("${jsearch.api.url:}")
+    private String apiUrl;
+
     private final RestTemplate rest = new RestTemplate();
 
 
     public void fetchJobs() {
 
-        String url = "https://jsearch.p.rapidapi.com/search?query=software%20developer&num_pages=1";
+        // Build URL for scheduled fetch. Use the configured `apiUrl` when present,
+        // but if it's a search endpoint we'll append a default query so scheduled
+        // sync fetches meaningful results. If no `apiUrl` is configured, fall
+        // back to the JSearch default search URL for "software developer".
+        String defaultQuery = java.net.URLEncoder.encode("software developer", java.nio.charset.StandardCharsets.UTF_8);
+        String url;
+        if (apiUrl != null && !apiUrl.isBlank()) {
+            if (apiUrl.contains("{query}")) {
+                url = apiUrl.replace("{query}", defaultQuery);
+            } else if (apiUrl.toLowerCase().contains("search")) {
+                url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + defaultQuery + "&num_pages=1";
+            } else {
+                // non-search endpoint (e.g. internships list) — call as-is
+                url = apiUrl;
+            }
+        } else {
+            url = "https://jsearch.p.rapidapi.com/search?query=software%20developer&num_pages=1";
+        }
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.set("X-RapidAPI-Key", apiKey);
-        headers.set("X-RapidAPI-Host", apiHost);
+        String key = (apiKey != null && !apiKey.isBlank()) ? apiKey : System.getenv("RAPID_API_KEY");
+        String host = (apiHost != null && !apiHost.isBlank()) ? apiHost : System.getenv("RAPID_API_HOST");
+        if (key != null && !key.isBlank()) headers.set("X-RapidAPI-Key", key);
+        if (host != null && !host.isBlank()) headers.set("X-RapidAPI-Host", host);
 
         org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
 
@@ -133,11 +155,27 @@ public class JobService {
         if (query == null || query.trim().isEmpty()) return Collections.emptyList();
 
         String encoded = java.net.URLEncoder.encode(query, java.nio.charset.StandardCharsets.UTF_8);
-        String url = String.format("https://jsearch.p.rapidapi.com/search?query=%s&num_pages=1", encoded);
+        // Build URL for query. Support three cases:
+        // 1) `jsearch.api.url` contains the literal token "{query}" -> replace it
+        // 2) `jsearch.api.url` points to a /search endpoint -> append query params
+        // 3) fallback to the JSearch search URL
+        String url;
+        if (apiUrl != null && !apiUrl.isBlank() && apiUrl.contains("{query}")) {
+            url = apiUrl.replace("{query}", encoded);
+        } else if (apiUrl != null && !apiUrl.isBlank() && apiUrl.toLowerCase().contains("search")) {
+            url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + encoded + "&num_pages=1";
+        } else if (apiUrl != null && !apiUrl.isBlank()) {
+            // apiUrl provided but not a search endpoint; try appending query
+            url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + encoded;
+        } else {
+            url = String.format("https://jsearch.p.rapidapi.com/search?query=%s&num_pages=1", encoded);
+        }
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.set("X-RapidAPI-Key", apiKey);
-        headers.set("X-RapidAPI-Host", apiHost);
+        String key = (apiKey != null && !apiKey.isBlank()) ? apiKey : System.getenv("RAPID_API_KEY");
+        String host = (apiHost != null && !apiHost.isBlank()) ? apiHost : System.getenv("RAPID_API_HOST");
+        if (key != null && !key.isBlank()) headers.set("X-RapidAPI-Key", key);
+        if (host != null && !host.isBlank()) headers.set("X-RapidAPI-Host", host);
 
         org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
 
