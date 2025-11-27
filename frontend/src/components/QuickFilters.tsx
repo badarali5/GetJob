@@ -28,14 +28,10 @@ const QuickFilters = () => {
       try {
         let data: any[] = [];
         try {
-          data = await getJson<any[]>('/api/jobs');
+          data = await getJson<any[]>('/jobs');
         } catch (e) {
-          try {
-            data = await getJson<any[]>('/jobs');
-          } catch (e2) {
-            console.error('Both /api/jobs and /jobs failed:', e, e2);
-            data = [];
-          }
+          console.error('/jobs failed:', e);
+          data = [];
         }
         
         // Enhance with mock metrics

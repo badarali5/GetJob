@@ -234,17 +234,13 @@ const JobsFixed = () => {
     setLoading(true);
     setError(null);
     try {
-      // Try /api/jobs first, then fall back to /jobs
+      // Call backend jobs endpoint
       let data: BackendJob[] = [];
       try {
-        data = await getJson<BackendJob[]>('/api/jobs');
+        data = await getJson<BackendJob[]>('/jobs');
       } catch (e) {
-        try {
-          data = await getJson<BackendJob[]>('/jobs');
-        } catch (e2) {
-          console.error('Both /api/jobs and /jobs failed:', e, e2);
-          throw new Error('Failed to fetch jobs from backend');
-        }
+        console.error('/jobs failed:', e);
+        throw new Error('Failed to fetch jobs from backend');
       }
 
       const results = data || [];
