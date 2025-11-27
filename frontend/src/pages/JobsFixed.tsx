@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -449,6 +449,40 @@ const JobsFixed = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Debounced live search: queries backend /jobs/search when possible, falls back to client filtering
+  const searchTimeout = useRef<number | null>(null);
+  const handleLiveSearch = (q: string) => {
+    // clear previous timer
+    if (searchTimeout.current) {
+      window.clearTimeout(searchTimeout.current);
+      searchTimeout.current = null;
+    }
+
+    // If query is short, just filter client-side dataset
+    if (!q || q.trim().length < 2) {
+      applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
+      return;
+    }
+
+    // debounce network calls
+    searchTimeout.current = window.setTimeout(async () => {
+      try {
+        // try backend search endpoint first
+        const path = `/jobs/search?title=${encodeURIComponent(q)}`;
+        const remote = await getJson<BackendJob[]>(path);
+        if (remote && Array.isArray(remote)) {
+          // replace job list with remote results and apply other filters
+          setJobs(remote);
+          applyFilters(remote, q, loc, workplace, jobTypeFilter, selectedSkills);
+          return;
+        }
+      } catch (err) {
+        // network or endpoint not available — fall back to client filtering
+        applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
+      }
+    }, 300) as unknown as number;
   };
 
   const applyFilters = (
