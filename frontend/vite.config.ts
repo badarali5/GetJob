@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     // Proxy API requests to backend to avoid CORS issues during local development
     proxy: {
-      '/api': {
+      '/jobs': {
         target: 'https://getjob-production.up.railway.app',
         changeOrigin: true,
         secure: true,
