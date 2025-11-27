@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
-import Jobs from "./pages/Jobs";
+import Jobs from "./pages/JobsFixed";
 import JobDetail from "./pages/JobDetail";
 import Employers from "./pages/Employers";
 import Signup from "./pages/Signup";
