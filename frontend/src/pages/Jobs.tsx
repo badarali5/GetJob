@@ -81,7 +81,19 @@ const Jobs = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getJson<BackendJob[]>('/jobs');
+      // Try /api/jobs first, then fall back to /jobs
+      let data: BackendJob[] = [];
+      try {
+        data = await getJson<BackendJob[]>('/api/jobs');
+      } catch (e) {
+        try {
+          data = await getJson<BackendJob[]>('/jobs');
+        } catch (e2) {
+          console.error('Both /api/jobs and /jobs failed:', e, e2);
+          throw new Error('Failed to fetch jobs from backend');
+        }
+      }
+      
       let results = data || [];
       
       // Build AVL Tree for skill-based indexing
@@ -101,7 +113,8 @@ const Jobs = () => {
       applyFilters(results, '', '', '', '', []);
     } catch (err: any) {
       console.error('Failed to fetch jobs', err);
-      setError(err?.message || 'Failed to fetch jobs');
+      setError(err?.message || 'Failed to fetch jobs. Make sure the backend is running on port 8081.');
+      setFilteredJobs([]);
     } finally {
       setLoading(false);
     }

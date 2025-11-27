@@ -26,7 +26,17 @@ const QuickFilters = () => {
     const fetchAndRankJobs = async () => {
       setLoading(true);
       try {
-        const data = await getJson<any[]>('/jobs');
+        let data: any[] = [];
+        try {
+          data = await getJson<any[]>('/api/jobs');
+        } catch (e) {
+          try {
+            data = await getJson<any[]>('/jobs');
+          } catch (e2) {
+            console.error('Both /api/jobs and /jobs failed:', e, e2);
+            data = [];
+          }
+        }
         
         // Enhance with mock metrics
         const jobsWithMetrics: JobWithMetrics[] = (data || []).map((job) => ({
@@ -62,6 +72,9 @@ const QuickFilters = () => {
         setTrendingJobs(topViewJobs);
       } catch (error) {
         console.error('Failed to fetch jobs:', error);
+        // Set empty arrays on error (graceful degradation)
+        setTopJobs([]);
+        setTrendingJobs([]);
       } finally {
         setLoading(false);
       }

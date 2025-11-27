@@ -16,8 +16,17 @@ const Index = () => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        // Fetch jobs from backend
-        const data = await getJson<any[]>('/jobs');
+        let data: any[] = [];
+        try {
+          data = await getJson<any[]>('/api/jobs');
+        } catch (e) {
+          try {
+            data = await getJson<any[]>('/jobs');
+          } catch (e2) {
+            console.error('Both /api/jobs and /jobs failed:', e, e2);
+            data = [];
+          }
+        }
         
         // Enhance with mock metrics (in production, these would come from the backend)
         const jobsWithMetrics: JobWithMetrics[] = (data || []).map((job, index) => ({
