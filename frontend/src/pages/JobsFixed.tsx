@@ -365,6 +365,7 @@ const JobsFixed = () => {
   const [workplace, setWorkplace] = useState('');
   const [jobTypeFilter, setJobTypeFilter] = useState('');
   const [salaryFilter, setSalaryFilter] = useState('');
+  const [sortOption, setSortOption] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [skillAutocomplete, setSkillAutocomplete] = useState<string[]>([]);
   const [skillSearchInput, setSkillSearchInput] = useState('');
@@ -474,14 +475,14 @@ const JobsFixed = () => {
       results = results.filter(j => (j.location || '').toLowerCase().includes('remote'));
     }
 
-    if (jobType && jobType.trim() !== '') {
+    if (jobType && jobType.trim() !== '' && jobType !== 'all') {
       // Use the AVL jobType index when available for O(log n) lookup + set intersection
       if (jobTypeTree) {
         const jobsWithType = jobTypeTree.search(jobType);
         const typeSet = new Set(jobsWithType.map(j => j.id));
         results = results.filter(j => typeSet.has(j.id));
       } else {
-        results = results.filter(j => (j.jobType || '').toLowerCase().includes(jobType.toLowerCase()));
+        results = results.filter(j => (j.jobType || '').toLowerCase() === jobType.toLowerCase());
       }
     }
 
@@ -618,11 +619,62 @@ const JobsFixed = () => {
                         <SelectValue placeholder="All Types" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover">
-                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="">All Types</SelectItem>
                         <SelectItem value="internship">Internship</SelectItem>
                         <SelectItem value="full-time">Full-time</SelectItem>
                         <SelectItem value="part-time">Part-time</SelectItem>
                         <SelectItem value="contract">Contract</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Minimum Salary</label>
+                    <Input
+                      placeholder="e.g., 80k, $100,000"
+                      className="bg-background"
+                      value={salaryFilter}
+                      onChange={(e) => {
+                        setSalaryFilter(e.target.value);
+                        applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Skills</label>
+                    <Input
+                      placeholder="e.g., React, Python, AWS"
+                      className="bg-background"
+                      value={selectedSkills.join(', ')}
+                      onChange={(e) => {
+                        const skills = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                        setSelectedSkills(skills);
+                        applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, skills);
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground">Comma-separated skill list</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Sort By Salary</label>
+                    <Select value={sortOption} onValueChange={(value) => {
+                      setSortOption(value);
+                      let sorted = [...(filteredJobs.length > 0 ? filteredJobs : jobs)];
+                      if (value === 'asc') {
+                        sorted = heapSortJobsBySalary(sorted);
+                      } else if (value === 'desc') {
+                        sorted = heapSortJobsBySalary(sorted).reverse();
+                      }
+                      setFilteredJobs(sorted);
+                    }}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="No Sort" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        <SelectItem value="">No Sort</SelectItem>
+                        <SelectItem value="asc">Salary: Low to High</SelectItem>
+                        <SelectItem value="desc">Salary: High to Low</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
