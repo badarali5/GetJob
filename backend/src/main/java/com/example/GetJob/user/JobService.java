@@ -64,7 +64,12 @@ public class JobService {
 
         org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
 
-        ResponseEntity<String> res = rest.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+        // Null-safety checks to satisfy static analyzers and avoid passing nulls to RestTemplate
+        String safeUrl = java.util.Objects.requireNonNull(url, "API URL must not be null");
+        org.springframework.http.HttpMethod method = org.springframework.http.HttpMethod.GET;
+        org.springframework.http.HttpMethod safeMethod = java.util.Objects.requireNonNull(method, "HttpMethod must not be null");
+
+        ResponseEntity<String> res = rest.exchange(safeUrl, safeMethod, entity, String.class);
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -110,7 +115,9 @@ public class JobService {
                         // if the query fails for any reason, fall back to saving
                     }
 
-                    jobRepository.save(job);
+                        // ensure job is non-null for callers and static analysis
+                        java.util.Objects.requireNonNull(job, "job must not be null");
+                        jobRepository.save(job);
                 }
             }
         } catch (Exception ex) {
@@ -129,6 +136,7 @@ public class JobService {
     }
 
     public Job postJob(Job job) {
+        java.util.Objects.requireNonNull(job, "job must not be null");
         return jobRepository.save(job);
     }
 
@@ -179,7 +187,11 @@ public class JobService {
 
         org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
 
-        ResponseEntity<String> res = rest.exchange(url, org.springframework.http.HttpMethod.GET, entity, String.class);
+        String safeUrl2 = java.util.Objects.requireNonNull(url, "API URL must not be null");
+        org.springframework.http.HttpMethod method2 = org.springframework.http.HttpMethod.GET;
+        org.springframework.http.HttpMethod safeMethod2 = java.util.Objects.requireNonNull(method2, "HttpMethod must not be null");
+
+        ResponseEntity<String> res = rest.exchange(safeUrl2, safeMethod2, entity, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(res.getBody());
@@ -222,6 +234,7 @@ public class JobService {
                     }
                 }
 
+                java.util.Objects.requireNonNull(job, "job must not be null");
                 Job persisted = jobRepository.save(job);
                 saved.add(persisted);
             }
