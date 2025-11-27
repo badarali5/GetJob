@@ -8,12 +8,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    // Proxy API requests to backend to avoid CORS issues during local development
+    // Proxy API requests to Railway backend during local development
     proxy: {
       '/api': {
-        target: 'http://localhost:8081',
+        target: 'https://getjob-production.up.railway.app',
         changeOrigin: true,
-        secure: false,
+        secure: true,
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     },
