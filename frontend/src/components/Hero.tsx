@@ -68,9 +68,19 @@ const Hero = () => {
                       <Button
                         variant="hero"
                         size="lg"
-                        className="h-20 px-8 text-xl w-full md:w-auto"
+                        className="h-20 px-8 text-xl w-full md:w-auto cursor-pointer"
                         onClick={() => {
-                          const url = `/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}${workplace ? `&workplace=${encodeURIComponent(workplace)}` : ''}${jobType ? `&type=${encodeURIComponent(jobType)}` : ''}${salary ? `&salary=${encodeURIComponent(salary)}` : ''}`;
+                          // Build URL with non-empty parameters only
+                          const params = new URLSearchParams();
+                          if (title.trim()) params.append('q', title);
+                          if (location.trim()) params.append('loc', location);
+                          if (workplace) params.append('workplace', workplace);
+                          if (jobType) params.append('type', jobType);
+                          if (salary) params.append('salary', salary);
+                          
+                          const queryString = params.toString();
+                          const url = queryString ? `/jobs?${queryString}` : '/jobs';
+                          console.log('Navigating to:', url);
                           navigate(url);
                         }}
                       >
