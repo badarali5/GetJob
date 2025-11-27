@@ -35,7 +35,7 @@ const Navbar = () => {
             How It Works
           </Link>
           <Link 
-            to="/" 
+            to="/employers" 
             className="text-md font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             For Employers
