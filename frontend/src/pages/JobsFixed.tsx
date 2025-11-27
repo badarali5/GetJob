@@ -639,7 +639,7 @@ const JobsFixed = () => {
                         <SelectValue placeholder="All Types" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover">
-                        <SelectItem value="">All Types</SelectItem>
+                        <SelectItem value="all">All Types</SelectItem>
                         <SelectItem value="internship">Internship</SelectItem>
                         <SelectItem value="full-time">Full-time</SelectItem>
                         <SelectItem value="part-time">Part-time</SelectItem>
@@ -692,7 +692,7 @@ const JobsFixed = () => {
                         <SelectValue placeholder="No Sort" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover">
-                        <SelectItem value="">No Sort</SelectItem>
+                        <SelectItem value="none">No Sort</SelectItem>
                         <SelectItem value="asc">Salary: Low to High</SelectItem>
                         <SelectItem value="desc">Salary: High to Low</SelectItem>
                       </SelectContent>
