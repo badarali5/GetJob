@@ -15,15 +15,17 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,https://getjobportal.vercel.app}")
     private String allowedOrigins;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Parse comma-separated origins from configuration
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        // Parse comma-separated origins from configuration (trim whitespace)
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+            .map(String::trim)
+            .toList();
         configuration.setAllowedOrigins(origins);
         
         // Allow common HTTP methods
@@ -48,8 +50,12 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                // Parse comma-separated origins from configuration (trim whitespace)
+                String[] origins = Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .toArray(String[]::new);
                 registry.addMapping("/**")
-                    .allowedOrigins("http://localhost:5173") // set to your frontend origin
+                    .allowedOrigins(origins)
                     .allowedMethods("*")
                     .allowedHeaders("*")
                     .allowCredentials(true)
