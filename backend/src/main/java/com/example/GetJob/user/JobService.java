@@ -53,12 +53,40 @@ public class JobService {
                 for (JsonNode j : results) {
                     Job job = new Job();
 
-                    job.setTitle(j.path("job_title").asText(null));
-                    job.setCompanyName(j.path("employer_name").asText(null));
-                    job.setLocation(j.path("job_city").asText(null));
+                    String title = j.path("job_title").asText(null);
+                    String employer = j.path("employer_name").asText(null);
+                    String city = j.path("job_city").asText(null);
+
+                    job.setTitle(title);
+                    job.setCompanyName(employer);
+                    job.setLocation(city);
                     job.setDescription(j.path("job_description").asText(null));
-                    job.setSalaryRange(j.path("job_salary_currency").asText("") 
-                                       + " " + j.path("job_salary").asText(""));
+                    job.setSalaryRange(j.path("job_salary_currency").asText("") + " " + j.path("job_salary").asText(""));
+                    job.setSource("jsearch");
+
+                    // try to parse posted_at if present
+                    if (j.hasNonNull("job_posted_at")) {
+                        try {
+                            String posted = j.path("job_posted_at").asText(null);
+                            if (posted != null && !posted.isEmpty()) {
+                                // Many APIs return ISO-8601-like strings; try parsing
+                                java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(posted);
+                                job.setPostedAt(odt.toLocalDateTime());
+                            }
+                        } catch (Exception ex) {
+                            // ignore parse errors
+                        }
+                    }
+
+                    // avoid duplicates (title + company + location)
+                    try {
+                        Optional<Job> existing = jobRepository.findExisting(title == null ? "" : title, employer == null ? "" : employer, city == null ? "" : city);
+                        if (existing.isPresent()) {
+                            continue; // skip saving duplicate
+                        }
+                    } catch (Exception ex) {
+                        // if the query fails for any reason, fall back to saving
+                    }
 
                     jobRepository.save(job);
                 }
@@ -121,13 +149,41 @@ public class JobService {
         List<Job> saved = new ArrayList<>();
         if (results.isArray()) {
             for (JsonNode j : results) {
+                String title = j.path("job_title").asText(null);
+                String employer = j.path("employer_name").asText(null);
+                String city = j.path("job_city").asText(null);
+
+                // avoid duplicates
+                try {
+                    Optional<Job> existing = jobRepository.findExisting(title == null ? "" : title, employer == null ? "" : employer, city == null ? "" : city);
+                    if (existing.isPresent()) {
+                        saved.add(existing.get());
+                        continue;
+                    }
+                } catch (Exception ex) {
+                    // ignore and continue
+                }
+
                 Job job = new Job();
-                job.setTitle(j.path("job_title").asText(null));
-                job.setCompanyName(j.path("employer_name").asText(null));
-                job.setLocation(j.path("job_city").asText(null));
+                job.setTitle(title);
+                job.setCompanyName(employer);
+                job.setLocation(city);
                 job.setDescription(j.path("job_description").asText(null));
                 job.setSalaryRange(j.path("job_salary_currency").asText("") + " " + j.path("job_salary").asText(""));
                 job.setSource("jsearch");
+
+                if (j.hasNonNull("job_posted_at")) {
+                    try {
+                        String posted = j.path("job_posted_at").asText(null);
+                        if (posted != null && !posted.isEmpty()) {
+                            java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(posted);
+                            job.setPostedAt(odt.toLocalDateTime());
+                        }
+                    } catch (Exception ex) {
+                        // ignore parse errors
+                    }
+                }
+
                 Job persisted = jobRepository.save(job);
                 saved.add(persisted);
             }

@@ -9,8 +9,6 @@ import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { getJson } from "@/lib/api";
-
-// shape returned by backend /jobs
 type BackendJob = {
   id: number | string;
   title?: string;
@@ -164,7 +162,7 @@ const Jobs = () => {
                 </div>
                 
                 <div className="relative">
-                  <MapPin className="absolute left-3 h-4 w-4 text-muted-foreground" />
+                  <MapPin className="absolute left-4 h-4 w-4 top-4 text-muted-foreground" />
                   <Input
                     placeholder="Location (city, remote)"
                     className="pl-9 h-12 bg-background"
