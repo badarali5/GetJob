@@ -163,6 +163,7 @@ const JobsFixed = () => {
   const [skillSearchInput, setSkillSearchInput] = useState('');
   const [skillTree, setSkillTree] = useState<AVLTree<BackendJob> | null>(null);
   const [allSkills, setAllSkills] = useState<string[]>([]);
+  const [jobTypeTree, setJobTypeTree] = useState<AVLTree<BackendJob> | null>(null);
   const locationHook = useLocation();
   const navigate = useNavigate();
 
@@ -192,8 +193,16 @@ const JobsFixed = () => {
         skills.forEach(skill => tree.insert(skill, job));
       });
 
+          // Build AVL Tree for jobType indexing
+          const jtTree = new AVLTree<BackendJob>();
+          results.forEach(job => {
+            const jt = (job.jobType || 'Unknown').toString();
+            jtTree.insert(jt, job);
+          });
+
       setSkillTree(tree);
       setAllSkills(tree.getAllSkills());
+      setJobTypeTree(jtTree);
       setJobs(results);
       // Apply current filters if any
       applyFilters(results, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
@@ -232,7 +241,14 @@ const JobsFixed = () => {
     }
 
     if (jobType && jobType.trim() !== '') {
-      results = results.filter(j => (j.jobType || '').toLowerCase().includes(jobType.toLowerCase()));
+      // Use the AVL jobType index when available for O(log n) lookup + set intersection
+      if (jobTypeTree) {
+        const jobsWithType = jobTypeTree.search(jobType);
+        const typeSet = new Set(jobsWithType.map(j => j.id));
+        results = results.filter(j => typeSet.has(j.id));
+      } else {
+        results = results.filter(j => (j.jobType || '').toLowerCase().includes(jobType.toLowerCase()));
+      }
     }
 
     if (salaryFilter && salaryFilter.trim() !== '') {
