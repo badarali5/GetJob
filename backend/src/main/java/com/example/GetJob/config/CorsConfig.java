@@ -15,7 +15,7 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,https://getjobportal.vercel.app}")
     private String allowedOrigins;
 
     @Bean
@@ -48,8 +48,10 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                // Parse comma-separated origins from configuration
+                String[] origins = allowedOrigins.split(",");
                 registry.addMapping("/**")
-                    .allowedOrigins("http://localhost:5173") // set to your frontend origin
+                    .allowedOrigins(origins)
                     .allowedMethods("*")
                     .allowedHeaders("*")
                     .allowCredentials(true)
