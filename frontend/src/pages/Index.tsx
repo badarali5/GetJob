@@ -18,14 +18,10 @@ const Index = () => {
       try {
         let data: any[] = [];
         try {
-          data = await getJson<any[]>('/api/jobs');
+          data = await getJson<any[]>('/jobs');
         } catch (e) {
-          try {
-            data = await getJson<any[]>('/jobs');
-          } catch (e2) {
-            console.error('Both /api/jobs and /jobs failed:', e, e2);
-            data = [];
-          }
+          console.error('/jobs failed:', e);
+          throw new Error('Failed to fetch jobs from backend');
         }
         
         // Enhance with mock metrics (in production, these would come from the backend)
