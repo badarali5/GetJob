@@ -88,6 +88,69 @@ function mergeSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
   return out;
 }
 
+// Heap sort implementation: sorts ascending by salary (nulls treated as -Infinity)
+function heapSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
+  // Copy to avoid mutating input
+  const a = arr.slice();
+  const n = a.length;
+
+  const cmp = (i: number, j: number) => {
+    const vi = getJobSalaryValue(a[i]);
+    const vj = getJobSalaryValue(a[j]);
+    const ni = vi === null ? -Infinity : vi;
+    const nj = vj === null ? -Infinity : vj;
+    return ni - nj;
+  };
+
+  const swap = (i: number, j: number) => { const t = a[i]; a[i] = a[j]; a[j] = t; };
+
+  const heapify = (size: number, root: number) => {
+    let smallest = root;
+    const l = 2 * root + 1;
+    const r = 2 * root + 2;
+    if (l < size && cmp(l, smallest) < 0) smallest = l;
+    if (r < size && cmp(r, smallest) < 0) smallest = r;
+    if (smallest !== root) {
+      swap(root, smallest);
+      heapify(size, smallest);
+    }
+  };
+
+  // Build min-heap
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(n, i);
+
+  // Extract elements to produce ascending array
+  const out: BackendJob[] = [];
+  const temp = a.slice();
+  let size = n;
+  while (size > 0) {
+    // root is smallest
+    out.push(temp[0]);
+    // move last to root
+    temp[0] = temp[size - 1];
+    size--;
+    // heapify reduced heap
+    const heapifyTemp = (s: number, rootIdx: number) => {
+      let smallest = rootIdx;
+      const l = 2 * rootIdx + 1;
+      const r = 2 * rootIdx + 2;
+      const getVal = (idx: number) => {
+        const v = getJobSalaryValue(temp[idx]);
+        return v === null ? -Infinity : v;
+      };
+      if (l < s && getVal(l) < getVal(smallest)) smallest = l;
+      if (r < s && getVal(r) < getVal(smallest)) smallest = r;
+      if (smallest !== rootIdx) {
+        const t = temp[rootIdx]; temp[rootIdx] = temp[smallest]; temp[smallest] = t;
+        heapifyTemp(s, smallest);
+      }
+    };
+    heapifyTemp(size, 0);
+  }
+
+  return out;
+}
+
 // find first index where job salary >= target. Jobs with null salary are treated as -Infinity and ignored (i.e., they come before target)
 function binarySearchFirstAtLeast(sorted: BackendJob[], target: number): number {
   let lo = 0;
@@ -108,9 +171,9 @@ function binarySearchFirstAtLeast(sorted: BackendJob[], target: number): number 
 }
 
 function filterJobsByMinSalary(jobList: BackendJob[], minSalary: number): BackendJob[] {
-  const sorted = mergeSortJobsBySalary(jobList);
+  // Use heap sort to produce ascending order by salary, then binary search
+  const sorted = heapSortJobsBySalary(jobList);
   const idx = binarySearchFirstAtLeast(sorted, minSalary);
-  // Return slice from idx to end, but exclude those with null salary (they'll be before idx)
   return sorted.slice(idx).filter(j => {
     const v = getJobSalaryValue(j);
     return v !== null && v >= minSalary;
