@@ -126,7 +126,8 @@ const Jobs = () => {
     location: string,
     workplaceType: string,
     jobType: string,
-    skills: string[]
+    skills: string[],
+    salary: string = salaryFilter
   ) => {
     let results = jobList;
 
@@ -149,8 +150,8 @@ const Jobs = () => {
       results = results.filter(j => (j.jobType || '').toLowerCase().includes(jobType.toLowerCase()));
     }
 
-    if (salaryFilter && salaryFilter.trim() !== '') {
-      results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(salaryFilter.toLowerCase()));
+    if (salary && salary.trim() !== '') {
+      results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(salary.toLowerCase()));
     }
 
     // Filter by selected skills using AVL Tree
@@ -170,7 +171,7 @@ const Jobs = () => {
     if (!selectedSkills.includes(skill)) {
       const newSkills = [...selectedSkills, skill];
       setSelectedSkills(newSkills);
-      applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, newSkills);
+      applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, newSkills, salaryFilter);
     }
     setSkillSearchInput('');
     setSkillAutocomplete([]);
@@ -179,7 +180,7 @@ const Jobs = () => {
   const handleSkillRemove = (skill: string) => {
     const newSkills = selectedSkills.filter(s => s !== skill);
     setSelectedSkills(newSkills);
-    applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, newSkills);
+    applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, newSkills, salaryFilter);
   };
 
   const handleSkillSearchChange = (value: string) => {
@@ -217,7 +218,7 @@ const Jobs = () => {
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
-                      applyFilters(jobs, e.target.value, loc, workplace, jobTypeFilter, selectedSkills);
+                      applyFilters(jobs, e.target.value, loc, workplace, jobTypeFilter, selectedSkills, salaryFilter);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -235,7 +236,7 @@ const Jobs = () => {
                     value={loc}
                     onChange={(e) => {
                       setLoc(e.target.value);
-                      applyFilters(jobs, searchTerm, e.target.value, workplace, jobTypeFilter, selectedSkills);
+                      applyFilters(jobs, searchTerm, e.target.value, workplace, jobTypeFilter, selectedSkills, salaryFilter);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -316,7 +317,7 @@ const Jobs = () => {
                     <label className="text-sm font-medium">Job Type</label>
                     <Select value={jobTypeFilter} onValueChange={(value) => {
                       setJobTypeFilter(value);
-                      applyFilters(jobs, searchTerm, loc, workplace, value, selectedSkills);
+                      applyFilters(jobs, searchTerm, loc, workplace, value, selectedSkills, salaryFilter);
                     }}>
                       <SelectTrigger className="bg-background">
                         <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
