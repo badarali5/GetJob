@@ -22,8 +22,10 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Parse comma-separated origins from configuration
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        // Parse comma-separated origins from configuration (trim whitespace)
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+            .map(String::trim)
+            .toList();
         configuration.setAllowedOrigins(origins);
         
         // Allow common HTTP methods
@@ -48,8 +50,10 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                // Parse comma-separated origins from configuration
-                String[] origins = allowedOrigins.split(",");
+                // Parse comma-separated origins from configuration (trim whitespace)
+                String[] origins = Arrays.stream(allowedOrigins.split(","))
+                    .map(String::trim)
+                    .toArray(String[]::new);
                 registry.addMapping("/**")
                     .allowedOrigins(origins)
                     .allowedMethods("*")
