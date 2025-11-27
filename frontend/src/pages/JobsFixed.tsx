@@ -210,6 +210,150 @@ function extractSkillsFromJob(job: BackendJob): string[] {
   return commonSkills.filter(skill => text.includes(skill.toLowerCase()));
 }
 
+// --- MaxHeap for top-paying jobs ---
+class MaxHeap {
+  private arr: BackendJob[];
+  constructor(jobs: BackendJob[] = []) {
+    this.arr = jobs.slice();
+    for (let i = Math.floor(this.arr.length / 2) - 1; i >= 0; i--) this.heapifyDown(i);
+  }
+  private left(i: number): number { return 2 * i + 1; }
+  private right(i: number): number { return 2 * i + 2; }
+  private swap(i: number, j: number) { const t = this.arr[i]; this.arr[i] = this.arr[j]; this.arr[j] = t; }
+  private getSalary(i: number): number { const v = getJobSalaryValue(this.arr[i]); return v === null ? -Infinity : v; }
+  private heapifyDown(i: number) {
+    let largest = i;
+    const l = this.left(i), r = this.right(i);
+    if (l < this.arr.length && this.getSalary(l) > this.getSalary(largest)) largest = l;
+    if (r < this.arr.length && this.getSalary(r) > this.getSalary(largest)) largest = r;
+    if (largest !== i) { this.swap(i, largest); this.heapifyDown(largest); }
+  }
+  extractMax(): BackendJob | null {
+    if (this.arr.length === 0) return null;
+    const max = this.arr[0];
+    this.arr[0] = this.arr[this.arr.length - 1];
+    this.arr.pop();
+    if (this.arr.length > 0) this.heapifyDown(0);
+    return max;
+  }
+  topK(k: number): BackendJob[] {
+    const result: BackendJob[] = [];
+    const heap = new MaxHeap(this.arr);
+    for (let i = 0; i < k && heap.arr.length > 0; i++) {
+      const job = heap.extractMax();
+      if (job) result.push(job);
+    }
+    return result;
+  }
+}
+
+// --- KMP for exact title matching ---
+function computeKMPTable(pattern: string): number[] {
+  const table = Array(pattern.length).fill(0);
+  let j = 0;
+  for (let i = 1; i < pattern.length; i++) {
+    while (j > 0 && pattern[i] !== pattern[j]) j = table[j - 1];
+    if (pattern[i] === pattern[j]) j++;
+    table[i] = j;
+  }
+  return table;
+}
+function kmpSearch(text: string, pattern: string): boolean {
+  if (pattern.length === 0) return true;
+  const table = computeKMPTable(pattern);
+  let j = 0;
+  for (let i = 0; i < text.length; i++) {
+    while (j > 0 && text[i] !== pattern[j]) j = table[j - 1];
+    if (text[i] === pattern[j]) j++;
+    if (j === pattern.length) return true;
+  }
+  return false;
+}
+
+// --- Boyer-Moore for description search ---
+function buildBadCharTable(pattern: string): Map<string, number> {
+  const table = new Map<string, number>();
+  for (let i = 0; i < pattern.length - 1; i++) table.set(pattern[i], pattern.length - 1 - i);
+  return table;
+}
+function boyerMooreSearch(text: string, pattern: string): boolean {
+  if (pattern.length === 0) return true;
+  if (pattern.length > text.length) return false;
+  const badChar = buildBadCharTable(pattern);
+  let i = 0;
+  while (i <= text.length - pattern.length) {
+    let j = pattern.length - 1;
+    while (j >= 0 && text[i + j] === pattern[j]) j--;
+    if (j < 0) return true;
+    const shift = badChar.get(text[i + j]) ?? pattern.length;
+    i += Math.max(1, shift);
+  }
+  return false;
+}
+
+// --- HashMap for skill lookups ---
+class SkillHashMap {
+  private map: Map<string, Set<string>>;
+  constructor() { this.map = new Map(); }
+  addSkill(skill: string, jobId: string) {
+    const key = skill.toLowerCase();
+    if (!this.map.has(key)) this.map.set(key, new Set());
+    this.map.get(key)!.add(jobId);
+  }
+  getJobsBySkill(skill: string): string[] { return Array.from(this.map.get(skill.toLowerCase()) ?? new Set()); }
+  hasSkill(skill: string): boolean { return this.map.has(skill.toLowerCase()); }
+  getAllSkills(): string[] { return Array.from(this.map.keys()); }
+}
+
+// --- Recommendation engine ---
+interface UserProfile {
+  userId: string;
+  skills: Set<string>;
+  appliedJobs: Set<string>;
+  preferences: Map<string, number>;
+}
+class JobRecommendationEngine {
+  private userProfiles: Map<string, UserProfile>;
+  private skillJobMap: SkillHashMap;
+  private categoryJobMap: Map<string, Set<string>>;
+  constructor(skillJobMap: SkillHashMap) {
+    this.userProfiles = new Map();
+    this.skillJobMap = skillJobMap;
+    this.categoryJobMap = new Map();
+  }
+  addUser(userId: string, skills: string[], preferences: Map<string, number>) {
+    this.userProfiles.set(userId, {
+      userId,
+      skills: new Set(skills.map(s => s.toLowerCase())),
+      appliedJobs: new Set(),
+      preferences
+    });
+  }
+  addJobToCategory(jobId: string, category: string) {
+    const key = category.toLowerCase();
+    if (!this.categoryJobMap.has(key)) this.categoryJobMap.set(key, new Set());
+    this.categoryJobMap.get(key)!.add(jobId);
+  }
+  recommendJobs(userId: string, topN: number = 5): string[] {
+    const user = this.userProfiles.get(userId);
+    if (!user) return [];
+    const scoreMap = new Map<string, number>();
+    for (const skill of user.skills) {
+      const jobIds = this.skillJobMap.getJobsBySkill(skill);
+      for (const jobId of jobIds) {
+        if (!user.appliedJobs.has(jobId)) scoreMap.set(jobId, (scoreMap.get(jobId) ?? 0) + 2);
+      }
+    }
+    for (const [category, preference] of user.preferences) {
+      const jobIds = this.categoryJobMap.get(category.toLowerCase()) ?? new Set();
+      for (const jobId of jobIds) {
+        if (!user.appliedJobs.has(jobId)) scoreMap.set(jobId, (scoreMap.get(jobId) ?? 0) + preference);
+      }
+    }
+    return Array.from(scoreMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, topN).map(([jobId]) => jobId);
+  }
+}
+
 const JobsFixed = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [jobs, setJobs] = useState<BackendJob[]>([]);
@@ -227,6 +371,8 @@ const JobsFixed = () => {
   const [skillTree, setSkillTree] = useState<AVLTree<BackendJob> | null>(null);
   const [allSkills, setAllSkills] = useState<string[]>([]);
   const [jobTypeTree, setJobTypeTree] = useState<AVLTree<BackendJob> | null>(null);
+  const [skillHashMap, setSkillHashMap] = useState<SkillHashMap | null>(null);
+  const [recommendationEngine, setRecommendationEngine] = useState<JobRecommendationEngine | null>(null);
   const locationHook = useLocation();
   const navigate = useNavigate();
 
@@ -266,6 +412,22 @@ const JobsFixed = () => {
       setSkillTree(tree);
       setAllSkills(tree.getAllSkills());
       setJobTypeTree(jtTree);
+
+      // Build HashMap for skill lookups and recommendation engine
+      const smap = new SkillHashMap();
+      results.forEach(job => {
+        const skills = job.skills && job.skills.length > 0 ? job.skills : extractSkillsFromJob(job);
+        skills.forEach(skill => smap.addSkill(skill, job.id));
+      });
+      setSkillHashMap(smap);
+      
+      const recEngine = new JobRecommendationEngine(smap);
+      results.forEach(job => {
+        const category = job.jobType || 'Unknown';
+        recEngine.addJobToCategory(job.id, category);
+      });
+      setRecommendationEngine(recEngine);
+
       setJobs(results);
       // Apply current filters if any
       applyFilters(results, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
@@ -289,10 +451,19 @@ const JobsFixed = () => {
     let results = jobList;
 
     if (searchQuery && searchQuery.trim() !== '') {
-      results = results.filter(j =>
-        (j.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (j.companyName || '').toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const q = searchQuery.trim().toLowerCase();
+      results = results.filter(j => {
+        const title = (j.title || '').toLowerCase();
+        const desc = (j.description || '').toLowerCase();
+        const company = (j.companyName || '').toLowerCase();
+        // Use KMP for title exact matching
+        const titleMatch = kmpSearch(title, q);
+        // Use Boyer-Moore for description search
+        const descMatch = boyerMooreSearch(desc, q);
+        // Also check company name substring
+        const companyMatch = company.includes(q);
+        return titleMatch || descMatch || companyMatch;
+      });
     }
 
     if (location && location.trim() !== '') {
@@ -326,7 +497,15 @@ const JobsFixed = () => {
       }
     }
 
-    if (skills.length > 0 && skillTree) {
+    if (skills.length > 0 && skillHashMap) {
+      // Use HashMap for quick skill lookups
+      const jobsBySkillId = new Set<string>();
+      skills.forEach(skill => {
+        const jobIds = skillHashMap.getJobsBySkill(skill);
+        jobIds.forEach(id => jobsBySkillId.add(id));
+      });
+      results = results.filter(j => jobsBySkillId.has(j.id));
+    } else if (skills.length > 0 && skillTree) {
       const jobsBySkill = new Set<BackendJob>();
       skills.forEach(skill => {
         const jobsWithSkill = skillTree.search(skill);
@@ -336,6 +515,12 @@ const JobsFixed = () => {
     }
 
     setFilteredJobs(results);
+  };
+
+  // Get top N paying jobs using MaxHeap
+  const getTopPayingJobs = (topN: number = 10): BackendJob[] => {
+    const heap = new MaxHeap(jobs);
+    return heap.topK(topN);
   };
 
   const searchJobs = async (q = '', l = '', opts: { workplace?: string; jobType?: string; salary?: string } = {}) => {
@@ -482,6 +667,26 @@ const JobsFixed = () => {
                   </div>
                 )}
                 {error && <div className="p-6 text-destructive">{error}</div>}
+
+                {jobs.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold mb-4">Top Paying Opportunities</h3>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {getTopPayingJobs(3).map((job) => (
+                        <JobCard
+                          key={String(job.id)}
+                          id={String(job.id)}
+                          title={job.title || 'Untitled'}
+                          company={job.companyName || 'Unknown'}
+                          location={job.location || 'Remote'}
+                          type={job.jobType || 'N/A'}
+                          postedDate={job.postedAt ? timeAgo(job.postedAt) : (job.createdAt ? timeAgo(job.createdAt) : '')}
+                          tags={job.skills || []}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid gap-6">
                   {(filteredJobs.length > 0 ? filteredJobs : jobs).map((job) => (
