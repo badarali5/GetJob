@@ -6,16 +6,17 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
-            // Enable CORS with configuration from CorsConfig
-            .cors(cors -> cors.configure(http))
+            // Enable CORS with configuration from CorsConfig (injected CorsConfigurationSource bean)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             // CSRF protection is disabled for stateless REST API with JWT authentication
             // where each request is authenticated via the token, not session cookies
             .csrf(csrf -> csrf.disable())
