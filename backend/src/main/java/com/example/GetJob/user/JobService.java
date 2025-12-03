@@ -121,8 +121,9 @@ public class JobService {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    System.out.println("JOB SYNC FAILED: " + ex.getMessage());
+}
+
     }
 
 
