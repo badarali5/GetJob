@@ -12,6 +12,25 @@ const Hero = () => {
   const [salary, setSalary] = useState('');
   const navigate = useNavigate();
 
+  const performSearch = (overrides: Partial<{ q: string; loc: string; workplace: string; type: string; salary: string }> = {}) => {
+    const q = overrides.q ?? title;
+    const locVal = overrides.loc ?? location;
+    const wp = overrides.workplace ?? workplace;
+    const typeVal = overrides.type ?? jobType;
+    const sal = overrides.salary ?? salary;
+
+    const params = new URLSearchParams();
+    if (q && q.trim()) params.append('q', q);
+    if (locVal && locVal.trim()) params.append('loc', locVal);
+    if (wp) params.append('workplace', wp);
+    if (typeVal) params.append('type', typeVal);
+    if (sal) params.append('salary', sal);
+
+    const queryString = params.toString();
+    const url = queryString ? `/jobs?${queryString}` : '/jobs';
+    navigate(url);
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-accent via-background to-background">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -51,6 +70,12 @@ const Hero = () => {
                         className="pl-16 pr-6 h-20 bg-background text-xl placeholder:text-muted-foreground w-full"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            performSearch();
+                          }
+                        }}
                       />
                     </div>
 
@@ -69,20 +94,7 @@ const Hero = () => {
                         variant="hero"
                         size="lg"
                         className="h-20 px-8 text-xl w-full md:w-auto cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/50"
-                        onClick={() => {
-                          // Build URL with non-empty parameters only
-                          const params = new URLSearchParams();
-                          if (title.trim()) params.append('q', title);
-                          if (location.trim()) params.append('loc', location);
-                          if (workplace) params.append('workplace', workplace);
-                          if (jobType) params.append('type', jobType);
-                          if (salary) params.append('salary', salary);
-                          
-                          const queryString = params.toString();
-                          const url = queryString ? `/jobs?${queryString}` : '/jobs';
-                          console.log('Navigating to:', url);
-                          navigate(url);
-                        }}
+                        onClick={() => performSearch()}
                       >
                         <Search className="h-6 w-6 mr-3" />
                         Search
@@ -92,15 +104,15 @@ const Hero = () => {
 
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
-                      className={`px-3 py-1 rounded-md text-sm ${workplace === 'remote' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
+                      className={`px-3 py-1 rounded-md text-sm ${location === 'remote' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
                       onClick={() => {
-                        const next = workplace === 'remote' ? '' : 'remote';
-                        setWorkplace(next);
-                        navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}&workplace=${encodeURIComponent(next)}&type=${encodeURIComponent(jobType)}&salary=${encodeURIComponent(salary)}`);
+                        const next = location === 'remote' ? '' : 'remote';
+                        setLocation(next);
+                        performSearch({ loc: next });
                       }}
                     >
-                      <span className="sr-only">Workplace</span>
-                      Workplace
+                      <span className="sr-only">Location</span>
+                      Location
                     </button>
 
                     <button
@@ -108,7 +120,7 @@ const Hero = () => {
                       onClick={() => {
                         const next = jobType === 'internship' ? '' : 'internship';
                         setJobType(next);
-                        navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}&workplace=${encodeURIComponent(workplace)}&type=${encodeURIComponent(next)}&salary=${encodeURIComponent(salary)}`);
+                        performSearch({ type: next });
                       }}
                     >
                       <Briefcase className="w-4 h-4" />
@@ -120,7 +132,7 @@ const Hero = () => {
                       onClick={() => {
                         const next = salary === 'any' ? '' : 'any';
                         setSalary(next);
-                        navigate(`/jobs?q=${encodeURIComponent(title)}&loc=${encodeURIComponent(location)}&workplace=${encodeURIComponent(workplace)}&type=${encodeURIComponent(jobType)}&salary=${encodeURIComponent(next)}`);
+                        performSearch({ salary: next });
                       }}
                     >
                       Salary
@@ -138,9 +150,10 @@ const Hero = () => {
             </div>
 
             <p className="text-sm text-muted-foreground py-5">
-              Popular: <span className="text-foreground font-medium">Software Engineer</span>, 
-              <span className="text-foreground font-medium"> Marketing Intern</span>, 
-              <span className="text-foreground font-medium"> Data Analyst</span>
+              Popular: 
+              <button className="text-foreground font-medium ml-1 mr-2" onClick={() => { setTitle('Software Engineer'); performSearch({ q: 'Software Engineer' }); }}>Software Engineer</button>,
+              <button className="text-foreground font-medium ml-1 mr-2" onClick={() => { setTitle('Marketing Intern'); performSearch({ q: 'Marketing Intern' }); }}>Marketing Intern</button>,
+              <button className="text-foreground font-medium ml-1" onClick={() => { setTitle('Data Analyst'); performSearch({ q: 'Data Analyst' }); }}>Data Analyst</button>
             </p>
           </div>
       
