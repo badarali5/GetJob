@@ -15,12 +15,10 @@ public class JobController {
     private static final Logger logger = LoggerFactory.getLogger(JobController.class);
 
     private final JobService jobService;
-    private final JobRepository repo;
 
     @Autowired
-    public JobController(JobService jobService, JobRepository repo) {
+    public JobController(JobService jobService) {
         this.jobService = jobService;
-        this.repo = repo;
     }
 
     @GetMapping("/sync")
