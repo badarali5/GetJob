@@ -3,6 +3,7 @@ package com.example.GetJob.auth.controller;
 import com.example.GetJob.auth.dto.AuthResponse;
 import com.example.GetJob.auth.dto.SigninRequest;
 import com.example.GetJob.auth.dto.SignupRequest;
+import com.example.GetJob.auth.dto.GoogleTokenRequest;
 import com.example.GetJob.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,18 @@ public class AuthController {
     public ResponseEntity<?> signin(@Valid @RequestBody SigninRequest request) {
         try {
             AuthResponse response = authService.signin(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleAuth(@Valid @RequestBody GoogleTokenRequest request) {
+        try {
+            AuthResponse response = authService.googleAuth(request.getToken());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
