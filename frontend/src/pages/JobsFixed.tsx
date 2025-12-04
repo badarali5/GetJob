@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getJson } from "@/lib/api";
+// API calls are disabled for JobsFixed; using hardcoded dataset instead
 import { AVLTree } from "@/lib/avlTree";
 
 // shape returned by backend /jobs
@@ -381,9 +381,116 @@ const JobsFixed = () => {
     setLoading(true);
     setError(null);
     try {
+      // ========== COMMENTED OUT API CALL ==========
       // Fetch jobs from backend API
-      const data = await getJson<BackendJob[]>('/jobs');
-      const results = data || [];
+      // const data = await getJson<BackendJob[]>('/jobs');
+      // const results = data || [];
+      // ============================================
+
+      // ========== HARDCODED 100 JOBS ==========
+      const results: BackendJob[] = [
+        { id: "1", title: "Senior React Developer", companyName: "TechCorp", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-12-01", description: "Build modern web apps with React, TypeScript, and Node.js", salaryRange: "$120k - $160k", skills: ["React", "TypeScript", "Node.js"] },
+        { id: "2", title: "Full Stack Engineer", companyName: "StartupXYZ", location: "Remote", jobType: "Full-time", postedAt: "2024-11-30", description: "Work on cutting-edge products with Python, Django, and PostgreSQL", salaryRange: "$100k - $140k", skills: ["Python", "Django", "PostgreSQL"] },
+        { id: "3", title: "DevOps Engineer", companyName: "CloudSolutions", location: "Austin, TX", jobType: "Full-time", postedAt: "2024-11-29", description: "Manage cloud infrastructure with AWS, Docker, Kubernetes", salaryRange: "$130k - $170k", skills: ["AWS", "Docker", "Kubernetes"] },
+        { id: "4", title: "Frontend Developer", companyName: "WebAgency", location: "New York, NY", jobType: "Contract", postedAt: "2024-11-28", description: "Create beautiful UIs with Vue.js and Tailwind CSS", salaryRange: "$90k - $120k", skills: ["Vue", "Tailwind", "JavaScript"] },
+        { id: "5", title: "Backend Developer", companyName: "DataCorp", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-11-27", description: "Build scalable APIs with Java Spring Boot and microservices", salaryRange: "$110k - $150k", skills: ["Java", "Spring Boot", "Microservices"] },
+        { id: "6", title: "Machine Learning Engineer", companyName: "AI Labs", location: "Boston, MA", jobType: "Full-time", postedAt: "2024-11-26", description: "Develop ML models with Python, TensorFlow, and PyTorch", salaryRange: "$140k - $180k", skills: ["Python", "Machine Learning", "AI"] },
+        { id: "7", title: "Mobile Developer", companyName: "AppStudio", location: "Los Angeles, CA", jobType: "Full-time", postedAt: "2024-11-25", description: "Build native mobile apps with React Native and Flutter", salaryRange: "$100k - $130k", skills: ["React", "JavaScript", "Mobile"] },
+        { id: "8", title: "Data Scientist", companyName: "Analytics Inc", location: "Chicago, IL", jobType: "Full-time", postedAt: "2024-11-24", description: "Analyze big data using Python, SQL, and Data Science tools", salaryRange: "$120k - $160k", skills: ["Python", "SQL", "Data Science"] },
+        { id: "9", title: "QA Engineer", companyName: "QualityFirst", location: "Remote", jobType: "Part-time", postedAt: "2024-11-23", description: "Test software with automated testing frameworks and CI/CD", salaryRange: "$80k - $100k", skills: ["Testing", "CI/CD", "JavaScript"] },
+        { id: "10", title: "UI/UX Designer", companyName: "DesignHub", location: "Portland, OR", jobType: "Full-time", postedAt: "2024-11-22", description: "Design user interfaces with Figma and modern design tools", salaryRange: "$90k - $120k", skills: ["HTML", "CSS", "Design"] },
+        { id: "11", title: "Cloud Architect", companyName: "MegaCorp", location: "Denver, CO", jobType: "Full-time", postedAt: "2024-11-21", description: "Design cloud solutions with AWS, Azure, and Cloud technologies", salaryRange: "$150k - $200k", skills: ["AWS", "Cloud", "Architecture"] },
+        { id: "12", title: "JavaScript Developer", companyName: "CodeFactory", location: "Miami, FL", jobType: "Full-time", postedAt: "2024-11-20", description: "Develop web applications with JavaScript, Node.js, and Express", salaryRange: "$95k - $125k", skills: ["JavaScript", "Node.js", "Express"] },
+        { id: "13", title: "Python Developer", companyName: "PyTech", location: "Remote", jobType: "Full-time", postedAt: "2024-11-19", description: "Build backend services with Python, Flask, and REST APIs", salaryRange: "$100k - $135k", skills: ["Python", "Flask", "REST"] },
+        { id: "14", title: "Security Engineer", companyName: "SecureNet", location: "Washington DC", jobType: "Full-time", postedAt: "2024-11-18", description: "Protect systems with cybersecurity and DevOps practices", salaryRange: "$130k - $170k", skills: ["Security", "DevOps", "Cloud"] },
+        { id: "15", title: "Database Administrator", companyName: "DataMasters", location: "Phoenix, AZ", jobType: "Full-time", postedAt: "2024-11-17", description: "Manage databases with PostgreSQL, MongoDB, and SQL", salaryRange: "$110k - $140k", skills: ["PostgreSQL", "MongoDB", "SQL"] },
+        { id: "16", title: "Angular Developer", companyName: "WebWorks", location: "San Diego, CA", jobType: "Contract", postedAt: "2024-11-16", description: "Create SPAs with Angular and TypeScript", salaryRange: "$90k - $115k", skills: ["Angular", "TypeScript", "JavaScript"] },
+        { id: "17", title: "Go Developer", companyName: "GoLang Inc", location: "Remote", jobType: "Full-time", postedAt: "2024-11-15", description: "Build microservices with Go and Docker", salaryRange: "$120k - $155k", skills: ["Go", "Docker", "Microservices"] },
+        { id: "18", title: "Rust Developer", companyName: "SystemCorp", location: "San Jose, CA", jobType: "Full-time", postedAt: "2024-11-14", description: "Develop high-performance systems with Rust and C++", salaryRange: "$130k - $170k", skills: ["Rust", "C++", "Systems"] },
+        { id: "19", title: "GraphQL Engineer", companyName: "API Solutions", location: "Atlanta, GA", jobType: "Full-time", postedAt: "2024-11-13", description: "Build APIs with GraphQL, Node.js, and REST", salaryRange: "$105k - $140k", skills: ["GraphQL", "Node.js", "REST"] },
+        { id: "20", title: "Kubernetes Specialist", companyName: "ContainerCo", location: "Remote", jobType: "Full-time", postedAt: "2024-11-12", description: "Manage container orchestration with Kubernetes and Docker", salaryRange: "$125k - $165k", skills: ["Kubernetes", "Docker", "DevOps"] },
+        { id: "21", title: "Next.js Developer", companyName: "Modern Web", location: "Dallas, TX", jobType: "Full-time", postedAt: "2024-11-11", description: "Build server-side rendered apps with Next.js and React", salaryRange: "$110k - $145k", skills: ["Next.js", "React", "TypeScript"] },
+        { id: "22", title: "AI Research Scientist", companyName: "DeepMind Labs", location: "Palo Alto, CA", jobType: "Full-time", postedAt: "2024-11-10", description: "Research AI and Machine Learning algorithms", salaryRange: "$160k - $220k", skills: ["AI", "Machine Learning", "Python"] },
+        { id: "23", title: "Blockchain Developer", companyName: "CryptoTech", location: "Remote", jobType: "Full-time", postedAt: "2024-11-09", description: "Develop blockchain applications with Solidity and Web3", salaryRange: "$140k - $180k", skills: ["Blockchain", "Solidity", "JavaScript"] },
+        { id: "24", title: "iOS Developer", companyName: "MobileFirst", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-11-08", description: "Build iOS apps with Swift and Xcode", salaryRange: "$115k - $150k", skills: ["iOS", "Swift", "Mobile"] },
+        { id: "25", title: "Android Developer", companyName: "AppDev", location: "Mountain View, CA", jobType: "Full-time", postedAt: "2024-11-07", description: "Create Android applications with Kotlin and Java", salaryRange: "$110k - $145k", skills: ["Android", "Kotlin", "Java"] },
+        { id: "26", title: "Site Reliability Engineer", companyName: "ReliableOps", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-11-06", description: "Ensure system reliability with SRE practices and automation", salaryRange: "$135k - $175k", skills: ["SRE", "DevOps", "Cloud"] },
+        { id: "27", title: "ETL Developer", companyName: "DataPipeline", location: "Chicago, IL", jobType: "Full-time", postedAt: "2024-11-05", description: "Build data pipelines with ETL tools and SQL", salaryRange: "$95k - $130k", skills: ["ETL", "SQL", "Data Science"] },
+        { id: "28", title: "Scala Developer", companyName: "Functional Code", location: "Remote", jobType: "Full-time", postedAt: "2024-11-04", description: "Develop functional programming solutions with Scala", salaryRange: "$120k - $160k", skills: ["Scala", "Functional", "Java"] },
+        { id: "29", title: "WordPress Developer", companyName: "CMS Agency", location: "Austin, TX", jobType: "Contract", postedAt: "2024-11-03", description: "Build custom WordPress sites with PHP and JavaScript", salaryRange: "$70k - $90k", skills: ["WordPress", "PHP", "JavaScript"] },
+        { id: "30", title: "Shopify Developer", companyName: "Ecommerce Pro", location: "New York, NY", jobType: "Full-time", postedAt: "2024-11-02", description: "Create Shopify stores with Liquid and JavaScript", salaryRange: "$85k - $110k", skills: ["Shopify", "JavaScript", "Ecommerce"] },
+        { id: "31", title: "Unity Developer", companyName: "GameStudio", location: "Los Angeles, CA", jobType: "Full-time", postedAt: "2024-11-01", description: "Develop games with Unity and C#", salaryRange: "$100k - $130k", skills: ["Unity", "C#", "Gaming"] },
+        { id: "32", title: "Unreal Engine Developer", companyName: "Epic Games Studio", location: "Raleigh, NC", jobType: "Full-time", postedAt: "2024-10-31", description: "Build AAA games with Unreal Engine and C++", salaryRange: "$110k - $150k", skills: ["Unreal", "C++", "Gaming"] },
+        { id: "33", title: "Salesforce Developer", companyName: "CRM Solutions", location: "Remote", jobType: "Full-time", postedAt: "2024-10-30", description: "Customize Salesforce with Apex and Lightning", salaryRange: "$105k - $140k", skills: ["Salesforce", "Apex", "CRM"] },
+        { id: "34", title: "SAP Consultant", companyName: "Enterprise Systems", location: "Boston, MA", jobType: "Full-time", postedAt: "2024-10-29", description: "Implement SAP solutions for enterprise clients", salaryRange: "$120k - $160k", skills: ["SAP", "ERP", "Consulting"] },
+        { id: "35", title: "Embedded Systems Engineer", companyName: "Hardware Co", location: "San Diego, CA", jobType: "Full-time", postedAt: "2024-10-28", description: "Develop embedded systems with C and C++", salaryRange: "$110k - $145k", skills: ["C", "C++", "Embedded"] },
+        { id: "36", title: "IoT Developer", companyName: "Smart Devices", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-10-27", description: "Build IoT solutions with embedded systems and cloud", salaryRange: "$115k - $150k", skills: ["IoT", "Cloud", "Embedded"] },
+        { id: "37", title: "Robotics Engineer", companyName: "RoboTech", location: "Pittsburgh, PA", jobType: "Full-time", postedAt: "2024-10-26", description: "Design robots with C++, Python, and AI", salaryRange: "$125k - $170k", skills: ["Robotics", "Python", "C++"] },
+        { id: "38", title: "Computer Vision Engineer", companyName: "Vision Labs", location: "Remote", jobType: "Full-time", postedAt: "2024-10-25", description: "Develop computer vision models with OpenCV and Python", salaryRange: "$130k - $175k", skills: ["Computer Vision", "Python", "AI"] },
+        { id: "39", title: "NLP Engineer", companyName: "Language AI", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-10-24", description: "Build NLP models with Python and Machine Learning", salaryRange: "$135k - $180k", skills: ["NLP", "Python", "Machine Learning"] },
+        { id: "40", title: "Data Engineer", companyName: "Big Data Corp", location: "Chicago, IL", jobType: "Full-time", postedAt: "2024-10-23", description: "Build data infrastructure with Spark, Kafka, and Python", salaryRange: "$120k - $160k", skills: ["Spark", "Kafka", "Python"] },
+        { id: "41", title: "Business Intelligence Analyst", companyName: "Analytics Pro", location: "Denver, CO", jobType: "Full-time", postedAt: "2024-10-22", description: "Analyze data with Tableau, SQL, and BI tools", salaryRange: "$85k - $115k", skills: ["BI", "SQL", "Tableau"] },
+        { id: "42", title: "Technical Writer", companyName: "DocuTech", location: "Remote", jobType: "Contract", postedAt: "2024-10-21", description: "Write technical documentation for software products", salaryRange: "$70k - $95k", skills: ["Documentation", "Writing", "Technical"] },
+        { id: "43", title: "Product Manager", companyName: "ProductCo", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-10-20", description: "Manage product roadmap and work with engineering teams", salaryRange: "$130k - $170k", skills: ["Product", "Management", "Strategy"] },
+        { id: "44", title: "Scrum Master", companyName: "Agile Teams", location: "Austin, TX", jobType: "Full-time", postedAt: "2024-10-19", description: "Facilitate agile processes and remove blockers", salaryRange: "$95k - $125k", skills: ["Scrum", "Agile", "Leadership"] },
+        { id: "45", title: "Engineering Manager", companyName: "Tech Leaders", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-10-18", description: "Lead engineering teams and drive technical excellence", salaryRange: "$150k - $200k", skills: ["Leadership", "Management", "Technical"] },
+        { id: "46", title: "Solutions Architect", companyName: "Architecture Firm", location: "Remote", jobType: "Full-time", postedAt: "2024-10-17", description: "Design scalable solutions with cloud and microservices", salaryRange: "$140k - $185k", skills: ["Architecture", "Cloud", "Microservices"] },
+        { id: "47", title: "Network Engineer", companyName: "NetWorks Inc", location: "Washington DC", jobType: "Full-time", postedAt: "2024-10-16", description: "Manage network infrastructure and security", salaryRange: "$100k - $135k", skills: ["Networking", "Security", "Infrastructure"] },
+        { id: "48", title: "Systems Administrator", companyName: "IT Services", location: "Phoenix, AZ", jobType: "Full-time", postedAt: "2024-10-15", description: "Administer Linux and Windows servers", salaryRange: "$80k - $110k", skills: ["Linux", "Windows", "Admin"] },
+        { id: "49", title: "Help Desk Technician", companyName: "Support Center", location: "Remote", jobType: "Part-time", postedAt: "2024-10-14", description: "Provide technical support to users", salaryRange: "$40k - $60k", skills: ["Support", "Technical", "Communication"] },
+        { id: "50", title: "Penetration Tester", companyName: "Security Pro", location: "New York, NY", jobType: "Full-time", postedAt: "2024-10-13", description: "Test security vulnerabilities and perform ethical hacking", salaryRange: "$110k - $145k", skills: ["Security", "Hacking", "Testing"] },
+        { id: "51", title: "Compliance Engineer", companyName: "RegTech", location: "Boston, MA", jobType: "Full-time", postedAt: "2024-10-12", description: "Ensure compliance with security and regulatory standards", salaryRange: "$105k - $140k", skills: ["Compliance", "Security", "Regulatory"] },
+        { id: "52", title: "Release Manager", companyName: "Deploy Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-10-11", description: "Manage software releases and CI/CD pipelines", salaryRange: "$100k - $130k", skills: ["CI/CD", "DevOps", "Management"] },
+        { id: "53", title: "Integration Engineer", companyName: "Connect API", location: "San Jose, CA", jobType: "Full-time", postedAt: "2024-10-10", description: "Integrate systems with APIs and middleware", salaryRange: "$95k - $125k", skills: ["APIs", "Integration", "Middleware"] },
+        { id: "54", title: "Performance Engineer", companyName: "Speed Tech", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-10-09", description: "Optimize system performance and scalability", salaryRange: "$115k - $150k", skills: ["Performance", "Optimization", "Testing"] },
+        { id: "55", title: "Build Engineer", companyName: "BuildOps", location: "Austin, TX", jobType: "Full-time", postedAt: "2024-10-08", description: "Manage build systems and automation tools", salaryRange: "$90k - $120k", skills: ["Build", "CI/CD", "Automation"] },
+        { id: "56", title: "Configuration Manager", companyName: "Config Pro", location: "Chicago, IL", jobType: "Full-time", postedAt: "2024-10-07", description: "Manage configuration and version control systems", salaryRange: "$85k - $115k", skills: ["Configuration", "Git", "DevOps"] },
+        { id: "57", title: "Platform Engineer", companyName: "Platform Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-10-06", description: "Build internal platforms and developer tools", salaryRange: "$125k - $165k", skills: ["Platform", "Infrastructure", "DevOps"] },
+        { id: "58", title: "Reliability Engineer", companyName: "Stable Systems", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-10-05", description: "Ensure system reliability and uptime", salaryRange: "$120k - $160k", skills: ["Reliability", "SRE", "Monitoring"] },
+        { id: "59", title: "Monitoring Engineer", companyName: "ObserveTech", location: "Denver, CO", jobType: "Full-time", postedAt: "2024-10-04", description: "Implement monitoring and alerting systems", salaryRange: "$95k - $130k", skills: ["Monitoring", "Observability", "DevOps"] },
+        { id: "60", title: "Automation Engineer", companyName: "AutoSystems", location: "Remote", jobType: "Full-time", postedAt: "2024-10-03", description: "Automate infrastructure and deployment processes", salaryRange: "$110k - $145k", skills: ["Automation", "Python", "DevOps"] },
+        { id: "61", title: "Infrastructure Engineer", companyName: "InfraCo", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-10-02", description: "Manage cloud infrastructure and IaC", salaryRange: "$115k - $155k", skills: ["Infrastructure", "Cloud", "Terraform"] },
+        { id: "62", title: "API Developer", companyName: "API First", location: "San Diego, CA", jobType: "Full-time", postedAt: "2024-10-01", description: "Design and build REST and GraphQL APIs", salaryRange: "$100k - $135k", skills: ["API", "REST", "GraphQL"] },
+        { id: "63", title: "Microservices Architect", companyName: "Micro Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-09-30", description: "Design microservices architectures", salaryRange: "$135k - $180k", skills: ["Microservices", "Architecture", "Cloud"] },
+        { id: "64", title: "Event-Driven Architect", companyName: "Event Systems", location: "New York, NY", jobType: "Full-time", postedAt: "2024-09-29", description: "Build event-driven systems with Kafka and messaging", salaryRange: "$130k - $175k", skills: ["Kafka", "Messaging", "Architecture"] },
+        { id: "65", title: "Serverless Developer", companyName: "Lambda Tech", location: "Remote", jobType: "Full-time", postedAt: "2024-09-28", description: "Build serverless applications with AWS Lambda", salaryRange: "$110k - $145k", skills: ["Serverless", "AWS", "Lambda"] },
+        { id: "66", title: "Edge Computing Engineer", companyName: "Edge Systems", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-09-27", description: "Develop edge computing solutions", salaryRange: "$120k - $160k", skills: ["Edge", "Cloud", "Distributed"] },
+        { id: "67", title: "Distributed Systems Engineer", companyName: "Distributed Co", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-09-26", description: "Build distributed systems and consensus algorithms", salaryRange: "$135k - $180k", skills: ["Distributed", "Systems", "Algorithms"] },
+        { id: "68", title: "Stream Processing Engineer", companyName: "Stream Tech", location: "Remote", jobType: "Full-time", postedAt: "2024-09-25", description: "Process real-time data streams with Kafka and Flink", salaryRange: "$125k - $165k", skills: ["Streaming", "Kafka", "Real-time"] },
+        { id: "69", title: "Search Engineer", companyName: "Search Systems", location: "Austin, TX", jobType: "Full-time", postedAt: "2024-09-24", description: "Build search systems with Elasticsearch", salaryRange: "$115k - $150k", skills: ["Elasticsearch", "Search", "Data"] },
+        { id: "70", title: "Caching Engineer", companyName: "Cache Pro", location: "Chicago, IL", jobType: "Full-time", postedAt: "2024-09-23", description: "Optimize caching layers with Redis and Memcached", salaryRange: "$105k - $140k", skills: ["Redis", "Caching", "Performance"] },
+        { id: "71", title: "Message Queue Engineer", companyName: "Queue Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-09-22", description: "Build message queues with RabbitMQ and Kafka", salaryRange: "$110k - $145k", skills: ["RabbitMQ", "Kafka", "Messaging"] },
+        { id: "72", title: "WebAssembly Developer", companyName: "Wasm Tech", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-09-21", description: "Build high-performance web apps with WebAssembly", salaryRange: "$120k - $160k", skills: ["WebAssembly", "Rust", "Performance"] },
+        { id: "73", title: "WebRTC Engineer", companyName: "Video Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-09-20", description: "Develop real-time communication with WebRTC", salaryRange: "$115k - $155k", skills: ["WebRTC", "Real-time", "Video"] },
+        { id: "74", title: "AR/VR Developer", companyName: "Reality Labs", location: "Los Angeles, CA", jobType: "Full-time", postedAt: "2024-09-19", description: "Create AR/VR experiences with Unity and Unreal", salaryRange: "$125k - $165k", skills: ["AR", "VR", "Unity"] },
+        { id: "75", title: "3D Graphics Engineer", companyName: "Graphics Pro", location: "San Jose, CA", jobType: "Full-time", postedAt: "2024-09-18", description: "Develop 3D graphics with WebGL and Three.js", salaryRange: "$120k - $160k", skills: ["3D", "WebGL", "Graphics"] },
+        { id: "76", title: "Animation Engineer", companyName: "Motion Studio", location: "Remote", jobType: "Full-time", postedAt: "2024-09-17", description: "Build animation systems and tools", salaryRange: "$105k - $140k", skills: ["Animation", "Graphics", "Tools"] },
+        { id: "77", title: "Physics Engine Developer", companyName: "Physics Systems", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-09-16", description: "Develop physics simulations for games", salaryRange: "$115k - $150k", skills: ["Physics", "C++", "Simulation"] },
+        { id: "78", title: "Audio Engineer", companyName: "Sound Tech", location: "Nashville, TN", jobType: "Full-time", postedAt: "2024-09-15", description: "Implement audio systems for games and apps", salaryRange: "$95k - $125k", skills: ["Audio", "DSP", "C++"] },
+        { id: "79", title: "Compiler Engineer", companyName: "Language Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-09-14", description: "Build compilers and programming languages", salaryRange: "$130k - $175k", skills: ["Compilers", "LLVM", "C++"] },
+        { id: "80", title: "Runtime Engineer", companyName: "VM Systems", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-09-13", description: "Develop language runtimes and VMs", salaryRange: "$125k - $170k", skills: ["Runtime", "VM", "Systems"] },
+        { id: "81", title: "Garbage Collection Engineer", companyName: "Memory Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-09-12", description: "Optimize garbage collection algorithms", salaryRange: "$120k - $160k", skills: ["GC", "Memory", "Performance"] },
+        { id: "82", title: "JIT Compiler Engineer", companyName: "JIT Systems", location: "Austin, TX", jobType: "Full-time", postedAt: "2024-09-11", description: "Build JIT compilers for dynamic languages", salaryRange: "$125k - $165k", skills: ["JIT", "Compilers", "Performance"] },
+        { id: "83", title: "Browser Engine Developer", companyName: "Browser Co", location: "Remote", jobType: "Full-time", postedAt: "2024-09-10", description: "Work on browser rendering engines", salaryRange: "$130k - $180k", skills: ["Browser", "Rendering", "C++"] },
+        { id: "84", title: "JavaScript Engine Developer", companyName: "JS Systems", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-09-09", description: "Optimize JavaScript engines", salaryRange: "$135k - $185k", skills: ["JavaScript", "V8", "Performance"] },
+        { id: "85", title: "OS Kernel Developer", companyName: "Kernel Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-09-08", description: "Develop operating system kernels", salaryRange: "$140k - $190k", skills: ["Kernel", "C", "OS"] },
+        { id: "86", title: "Driver Developer", companyName: "Hardware Systems", location: "San Diego, CA", jobType: "Full-time", postedAt: "2024-09-07", description: "Write device drivers for hardware", salaryRange: "$110k - $145k", skills: ["Drivers", "C", "Hardware"] },
+        { id: "87", title: "Firmware Engineer", companyName: "Embedded Pro", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-09-06", description: "Develop firmware for embedded devices", salaryRange: "$115k - $150k", skills: ["Firmware", "C", "Embedded"] },
+        { id: "88", title: "Hardware Engineer", companyName: "Silicon Valley Co", location: "San Jose, CA", jobType: "Full-time", postedAt: "2024-09-05", description: "Design hardware and circuit boards", salaryRange: "$120k - $160k", skills: ["Hardware", "FPGA", "Design"] },
+        { id: "89", title: "FPGA Engineer", companyName: "Logic Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-09-04", description: "Program FPGAs with VHDL and Verilog", salaryRange: "$115k - $155k", skills: ["FPGA", "VHDL", "Hardware"] },
+        { id: "90", title: "ASIC Engineer", companyName: "Chip Design Co", location: "Austin, TX", jobType: "Full-time", postedAt: "2024-09-03", description: "Design custom ASICs for specialized hardware", salaryRange: "$130k - $180k", skills: ["ASIC", "Verilog", "Design"] },
+        { id: "91", title: "Quantum Computing Engineer", companyName: "Quantum Labs", location: "Remote", jobType: "Full-time", postedAt: "2024-09-02", description: "Research quantum algorithms and systems", salaryRange: "$150k - $200k", skills: ["Quantum", "Physics", "Algorithms"] },
+        { id: "92", title: "Cryptography Engineer", companyName: "Crypto Systems", location: "Washington DC", jobType: "Full-time", postedAt: "2024-09-01", description: "Implement cryptographic systems and protocols", salaryRange: "$125k - $170k", skills: ["Cryptography", "Security", "Math"] },
+        { id: "93", title: "Protocol Engineer", companyName: "Network Pro", location: "Remote", jobType: "Full-time", postedAt: "2024-08-31", description: "Design network protocols and standards", salaryRange: "$120k - $160k", skills: ["Protocols", "Networking", "Standards"] },
+        { id: "94", title: "DNS Engineer", companyName: "DNS Systems", location: "San Francisco, CA", jobType: "Full-time", postedAt: "2024-08-30", description: "Manage DNS infrastructure at scale", salaryRange: "$110k - $145k", skills: ["DNS", "Networking", "Infrastructure"] },
+        { id: "95", title: "CDN Engineer", companyName: "Content Delivery", location: "Remote", jobType: "Full-time", postedAt: "2024-08-29", description: "Build content delivery networks", salaryRange: "$115k - $155k", skills: ["CDN", "Networking", "Performance"] },
+        { id: "96", title: "Load Balancer Engineer", companyName: "Balance Systems", location: "Seattle, WA", jobType: "Full-time", postedAt: "2024-08-28", description: "Develop load balancing solutions", salaryRange: "$110k - $150k", skills: ["Load Balancing", "Networking", "HA"] },
+        { id: "97", title: "Proxy Engineer", companyName: "Proxy Tech", location: "Chicago, IL", jobType: "Full-time", postedAt: "2024-08-27", description: "Build reverse proxies and API gateways", salaryRange: "$105k - $140k", skills: ["Proxy", "Nginx", "Networking"] },
+        { id: "98", title: "Service Mesh Engineer", companyName: "Mesh Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-08-26", description: "Implement service mesh with Istio", salaryRange: "$120k - $160k", skills: ["Service Mesh", "Istio", "Kubernetes"] },
+        { id: "99", title: "API Gateway Engineer", companyName: "Gateway Pro", location: "Austin, TX", jobType: "Full-time", postedAt: "2024-08-25", description: "Build API gateways and management platforms", salaryRange: "$115k - $150k", skills: ["API Gateway", "REST", "Microservices"] },
+        { id: "100", title: "Backend for Frontend Engineer", companyName: "BFF Systems", location: "Remote", jobType: "Full-time", postedAt: "2024-08-24", description: "Create BFF layers for mobile and web clients", salaryRange: "$110k - $145k", skills: ["BFF", "Node.js", "GraphQL"] }
+      ];
+      // ========================================
 
       // Build AVL Tree for skill-based indexing
       const tree = new AVLTree<BackendJob>();
@@ -428,6 +535,7 @@ const JobsFixed = () => {
     }
   };
 
+  // ========== COMMENTED OUT LIVE SEARCH API ==========
   // Debounced live search: queries backend /jobs/search when possible, falls back to client filtering
   const searchTimeout = useRef<number | null>(null);
   const handleLiveSearch = (q: string) => {
@@ -437,29 +545,26 @@ const JobsFixed = () => {
       searchTimeout.current = null;
     }
 
-    // If query is short, just filter client-side dataset
-    if (!q || q.trim().length < 2) {
-      applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
-      return;
-    }
+    // Just filter client-side dataset (API search commented out)
+    applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
 
-    // debounce network calls
-    searchTimeout.current = window.setTimeout(async () => {
-      try {
-        // try backend search endpoint first
-        const path = `/jobs/search?title=${encodeURIComponent(q)}`;
-        const remote = await getJson<BackendJob[]>(path);
-        if (remote && Array.isArray(remote)) {
-          // replace job list with remote results and apply other filters
-          setJobs(remote);
-          applyFilters(remote, q, loc, workplace, jobTypeFilter, selectedSkills);
-          return;
-        }
-      } catch (err) {
-        // network or endpoint not available — fall back to client filtering
-        applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
-      }
-    }, 300) as unknown as number;
+    // // debounce network calls
+    // searchTimeout.current = window.setTimeout(async () => {
+    //   try {
+    //     // try backend search endpoint first
+    //     const path = `/jobs/search?title=${encodeURIComponent(q)}`;
+    //     const remote = await getJson<BackendJob[]>(path);
+    //     if (remote && Array.isArray(remote)) {
+    //       // replace job list with remote results and apply other filters
+    //       setJobs(remote);
+    //       applyFilters(remote, q, loc, workplace, jobTypeFilter, selectedSkills);
+    //       return;
+    //     }
+    //   } catch (err) {
+    //     // network or endpoint not available — fall back to client filtering
+    //     applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
+    //   }
+    // }, 300) as unknown as number;
   };
 
   const applyFilters = (
@@ -717,7 +822,8 @@ const JobsFixed = () => {
                   <p className="text-muted-foreground">Showing <span className="font-semibold text-foreground">{filteredJobs.length || jobs.length}</span> opportunities</p>
 
                   <div className="flex items-center gap-3">
-                    <Button
+                    {/* ========== COMMENTED OUT SYNC API ========== */}
+                    {/* <Button
                       variant="secondary"
                       size="sm"
                       onClick={async () => {
@@ -734,7 +840,7 @@ const JobsFixed = () => {
                       }}
                     >
                       {loading ? 'Syncing' : 'Sync jobs'}
-                    </Button>
+                    </Button> */}
 
                     <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setShowFilters(!showFilters)}>
                       <SlidersHorizontal className="h-4 w-4 mr-2" />
