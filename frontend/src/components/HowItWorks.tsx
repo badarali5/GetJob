@@ -47,7 +47,7 @@ const HowItWorks = () => {
                       <div className="hidden md:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-primary to-transparent -z-10"></div>
                     )}
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-2">
                       Step {index + 1}

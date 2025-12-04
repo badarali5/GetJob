@@ -21,8 +21,6 @@ public class Application {
 
     @Column(nullable = false)
     private LocalDateTime appliedAt;
-
-    // Constructors
     public Application() {}
 
     public Application(com.example.GetJob.auth.model.User user, Job job) {
@@ -30,8 +28,6 @@ public class Application {
         this.job = job;
         this.appliedAt = LocalDateTime.now();
     }
-
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

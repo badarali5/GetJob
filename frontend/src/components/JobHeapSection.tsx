@@ -47,13 +47,6 @@ function timeAgo(dateLike?: string | null) {
   return `${years}y ago`;
 }
 
-/**
- * Component to display top jobs sorted by a specific metric using MaxHeap
- * Examples:
- * - Top Jobs by Salary (highest paying)
- * - Trending Jobs (most viewed)
- * - Most Popular Jobs (most applications)
- */
 export const JobHeapSection: React.FC<JobHeapSectionProps> = ({
   jobs,
   title,
@@ -63,8 +56,6 @@ export const JobHeapSection: React.FC<JobHeapSectionProps> = ({
 }) => {
   const topJobs = useMemo(() => {
     if (!jobs || jobs.length === 0) return [];
-
-    // Create heap with priority based on metric
     const heap = new MaxHeap<JobWithMetrics & { priority: number }>();
 
     jobs.forEach(job => {
@@ -82,8 +73,6 @@ export const JobHeapSection: React.FC<JobHeapSectionProps> = ({
         priority,
       });
     });
-
-    // Extract top N items
     const result: (JobWithMetrics & { priority: number })[] = [];
     let count = 0;
     while (count < limit && !heap.isEmpty()) {
@@ -118,12 +107,12 @@ export const JobHeapSection: React.FC<JobHeapSectionProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {topJobs.map((job, index) => (
             <div key={job.id} className="relative">
-              {/* Ranking badge */}
+              {}
               <div className="absolute -top-2 -left-2 bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm z-10">
                 #{index + 1}
               </div>
 
-              {/* Metric display */}
+              {}
               <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm rounded-lg px-3 py-1 flex items-center gap-1 text-sm font-semibold">
                 {metric === "salary" && (
                   <>

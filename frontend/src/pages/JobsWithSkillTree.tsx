@@ -10,8 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getJson } from "@/lib/api";
 import { AVLTree } from "@/lib/avlTree";
-
-// shape returned by backend /jobs
 type BackendJob = {
   id: string;
   title?: string;
@@ -43,9 +41,6 @@ function timeAgo(dateLike?: string | null) {
   return `${years}y ago`;
 }
 
-/**
- * Extract skills from job description and title
- */
 function extractSkillsFromJob(job: BackendJob): string[] {
   const commonSkills = [
     'React', 'Vue', 'Angular', 'Node.js', 'Python', 'Java', 'C++', 'JavaScript', 'TypeScript',
@@ -58,14 +53,10 @@ function extractSkillsFromJob(job: BackendJob): string[] {
   return commonSkills.filter(skill => text.includes(skill.toLowerCase()));
 }
 
-/**
- * Parse minimum salary from salaryRange string
- */
 function parseMinSalary(salaryRange?: string): number {
   if (!salaryRange) return 0;
   const numbers = salaryRange.match(/\d+/g);
   if (!numbers) return 0;
-  // Take the first number as min salary
   return parseInt(numbers[0]) || 0;
 }
 
@@ -95,8 +86,6 @@ const Jobs = () => {
     try {
       const data = await getJson<BackendJob[]>('/jobs');
       let results = data || [];
-      
-      // Build AVL Tree for skill-based indexing
       const tree = new AVLTree<BackendJob>();
       results.forEach(job => {
         const skills = job.skills && job.skills.length > 0 
@@ -106,7 +95,7 @@ const Jobs = () => {
           tree.insert(skill, job);
         });
       });
-      
+
       setSkillTree(tree);
       setAllSkills(tree.getAllSkills());
       setJobs(results);
@@ -154,8 +143,6 @@ const Jobs = () => {
         results = results.filter(j => parseMinSalary(j.salaryRange) >= minSalary);
       }
     }
-
-    // Filter by selected skills using AVL Tree
     if (skills.length > 0 && skillTree) {
       const jobsBySkill = new Set<BackendJob>();
       skills.forEach(skill => {
@@ -164,8 +151,6 @@ const Jobs = () => {
       });
       results = results.filter(job => jobsBySkill.has(job));
     }
-
-    // Apply sorting
     if (sortBy === 'salary-high') {
       results = results.sort((a, b) => parseMinSalary(b.salaryRange) - parseMinSalary(a.salaryRange));
     } else if (sortBy === 'salary-low') {
@@ -209,19 +194,18 @@ const Jobs = () => {
 
   useEffect(() => {
     void fetchJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-1">
-        {/* Search Bar */}
+        {}
         <section className="bg-accent/50 py-12 border-b">
           <div className="container mx-auto px-4">
             <h1 className="text-3xl font-bold mb-6">Browse Opportunities</h1>
-            
+
             <div className="bg-card rounded-xl p-4 shadow-lg border">
               <div className="grid md:grid-cols-4 gap-3">
                 <div className="relative flex items-center md:col-span-2">
@@ -241,7 +225,7 @@ const Jobs = () => {
                     }}
                   />
                 </div>
-                
+
                 <div className="relative">
                   <MapPin className="absolute left-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -276,16 +260,16 @@ const Jobs = () => {
           </div>
         </section>
 
-        {/* Job Listings */}
+        {}
         <section className="py-12">
           <div className="container mx-auto px-4">
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Filters Sidebar */}
+              {}
               <aside className={`lg:w-80 space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Filters</h3>
-                  
-                  {/* Skill-based Search using AVL Tree */}
+
+                  {}
                   <div className="space-y-3 p-4 bg-accent/30 rounded-lg border">
                     <label className="text-sm font-medium">Search by Skills</label>
                     <div className="relative">
@@ -333,7 +317,7 @@ const Jobs = () => {
                       {allSkills.length > 0 ? `${allSkills.length} skills indexed` : 'Loading skills...'}
                     </p>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Job Type</label>
                     <Select value={jobTypeFilter} onValueChange={(value) => {
@@ -388,13 +372,13 @@ const Jobs = () => {
                 </div>
               </aside>
 
-              {/* Job Cards */}
+              {}
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-6">
                   <p className="text-muted-foreground">
                     Showing <span className="font-semibold text-foreground">{filteredJobs.length}</span> opportunities
                   </p>
-                  
+
                   <div className="flex items-center gap-3">
                     <Button
                       variant="secondary"

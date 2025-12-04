@@ -23,8 +23,6 @@ const Index = () => {
           console.error('/jobs failed:', e);
           throw new Error('Failed to fetch jobs from backend');
         }
-        
-        // Enhance with mock metrics (in production, these would come from the backend)
         const jobsWithMetrics: JobWithMetrics[] = (data || []).map((job, index) => ({
           ...job,
           id: String(job.id),
@@ -32,7 +30,7 @@ const Index = () => {
           salary: job.salaryRange ? parseInt(job.salaryRange) : 50000 + Math.random() * 100000,
           popularity: Math.floor(Math.random() * 500) + 10,
         }));
-        
+
         setJobs(jobsWithMetrics);
       } catch (error) {
         console.error('Failed to fetch jobs:', error);
@@ -49,7 +47,6 @@ const Index = () => {
       <Navbar />
       <Hero />
       <QuickFilters />
-      
 
       <HowItWorks />
       <Footer />

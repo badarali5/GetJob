@@ -23,7 +23,6 @@ export class AVLNode<T> {
   }
 }
 
-
 export class AVLTree<T extends { id: string }> {
   root: AVLNode<T> | null;
 
@@ -31,22 +30,18 @@ export class AVLTree<T extends { id: string }> {
     this.root = null;
   }
 
-  
   private getHeight(node: AVLNode<T> | null): number {
     return node ? node.height : 0;
   }
 
-  
   private getBalance(node: AVLNode<T> | null): number {
     return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
   }
 
-  
   private updateHeight(node: AVLNode<T>): void {
     node.height = Math.max(this.getHeight(node.left), this.getHeight(node.right)) + 1;
   }
 
-  
   private rotateRight(y: AVLNode<T>): AVLNode<T> {
     const x = y.left!;
     const T2 = x.right;
@@ -60,7 +55,6 @@ export class AVLTree<T extends { id: string }> {
     return x;
   }
 
-  
   private rotateLeft(x: AVLNode<T>): AVLNode<T> {
     const y = x.right!;
     const T2 = y.left;
@@ -74,7 +68,6 @@ export class AVLTree<T extends { id: string }> {
     return y;
   }
 
-  
   insert(skill: string, job: T): void {
     this.root = this._insert(this.root, skill, job);
   }
@@ -92,7 +85,7 @@ export class AVLTree<T extends { id: string }> {
     } else if (skillLower > nodeLower) {
       node.right = this._insert(node.right, skill, job);
     } else {
-      
+
       if (!node.jobs.find(j => j.id === job.id)) {
         node.jobs.push(job);
       }
@@ -102,23 +95,19 @@ export class AVLTree<T extends { id: string }> {
     this.updateHeight(node);
     const balance = this.getBalance(node);
 
-    
     if (balance > 1 && skillLower < node.left!.skill.toLowerCase()) {
       return this.rotateRight(node);
     }
 
-    
     if (balance < -1 && skillLower > node.right!.skill.toLowerCase()) {
       return this.rotateLeft(node);
     }
 
-    
     if (balance > 1 && skillLower > node.left!.skill.toLowerCase()) {
       node.left = this.rotateLeft(node.left!);
       return this.rotateRight(node);
     }
 
-    
     if (balance < -1 && skillLower < node.right!.skill.toLowerCase()) {
       node.right = this.rotateRight(node.right!);
       return this.rotateLeft(node);
@@ -127,7 +116,6 @@ export class AVLTree<T extends { id: string }> {
     return node;
   }
 
-  
   search(skill: string): T[] {
     const node = this._search(this.root, skill);
     return node ? node.jobs : [];
@@ -150,7 +138,6 @@ export class AVLTree<T extends { id: string }> {
     }
   }
 
-  
   getAllSkills(): string[] {
     const skills: string[] = [];
     this._inOrder(this.root, skills);
@@ -164,7 +151,6 @@ export class AVLTree<T extends { id: string }> {
     this._inOrder(node.right, skills);
   }
 
-  
   getAllJobs(): T[] {
     const jobs: T[] = [];
     this._collectAllJobs(this.root, jobs);
@@ -178,7 +164,6 @@ export class AVLTree<T extends { id: string }> {
     this._collectAllJobs(node.right, jobs);
   }
 
-  
   searchByPrefix(prefix: string): string[] {
     const results: string[] = [];
     const lowerPrefix = prefix.toLowerCase();
@@ -195,7 +180,6 @@ export class AVLTree<T extends { id: string }> {
     this._prefixSearch(node.right, prefix, results);
   }
 
-  
   clear(): void {
     this.root = null;
   }

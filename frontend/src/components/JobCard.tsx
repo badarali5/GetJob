@@ -26,7 +26,7 @@ const JobCard = ({ id, title, company, location, type, postedDate, logo, tags = 
 
   const handleBookmark = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     const user = getUser();
     if (!user || !user.id) {
       toast({
@@ -71,7 +71,7 @@ const JobCard = ({ id, title, company, location, type, postedDate, logo, tags = 
                 <Briefcase className="h-6 w-6 text-primary-foreground" />
               </div>
             )}
-            
+
             <div className="space-y-1">
               <h3 className="font-semibold text-xl group-hover:text-primary transition-colors">
                 {title}

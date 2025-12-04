@@ -35,12 +35,9 @@ public class AuthService {
     }
 
     public AuthResponse signup(SignupRequest request) {
-        // Check if user already exists
         if (authUserRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");
         }
-
-        // Create new user
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
@@ -49,24 +46,17 @@ public class AuthService {
         user.setCreatedAt(LocalDateTime.now());
 
         user = authUserRepository.save(user);
-
-        // Generate JWT token
         String token = generateToken(user);
 
         return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
     }
 
     public AuthResponse signin(SigninRequest request) {
-        // Find user by email
         User user = authUserRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-
-        // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
         }
-
-        // Generate JWT token
         String token = generateToken(user);
 
         return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
@@ -74,21 +64,17 @@ public class AuthService {
 
     public AuthResponse googleAuth(String googleToken) {
         try {
-            // Decode Google JWT token and extract claims
             JsonNode claims = decodeGoogleToken(googleToken);
-            
+
             String email = claims.get("email").asText();
             String name = claims.has("name") ? claims.get("name").asText() : email.split("@")[0];
-            
+
             if (email == null || email.isEmpty()) {
                 throw new RuntimeException("Invalid Google token: email not found");
             }
-
-            // Find or create user
             User user = authUserRepository.findByEmail(email).orElse(null);
-            
+
             if (user == null) {
-                // Create new user from Google info
                 user = new User();
                 user.setEmail(email);
                 user.setName(name);
@@ -97,8 +83,6 @@ public class AuthService {
                 user.setCreatedAt(LocalDateTime.now());
                 user = authUserRepository.save(user);
             }
-
-            // Generate JWT token
             String token = generateToken(user);
 
             return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
@@ -112,15 +96,12 @@ public class AuthService {
         if (tokenParts.length != 3) {
             throw new RuntimeException("Invalid token format");
         }
-        
-        // Decode the payload (second part)
         String payload = tokenParts[1];
-        // Add padding if necessary
         int padding = 4 - (payload.length() % 4);
         if (padding < 4) {
             payload += "=".repeat(padding);
         }
-        
+
         byte[] decodedBytes = java.util.Base64.getUrlDecoder().decode(payload);
         return objectMapper.readTree(decodedBytes);
     }

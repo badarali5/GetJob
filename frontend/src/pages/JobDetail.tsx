@@ -9,8 +9,6 @@ import { MapPin, Briefcase, Clock, Building2, DollarSign, ArrowLeft, Bookmark, S
 import { applyForJob, saveJobForLater, getUser } from "@/lib/api";
 import { getPromptForJob } from "@/lib/prompts";
 import { useToast } from "@/hooks/use-toast";
-
-// Fallback job detail template (used when concrete job data isn't found)
 const fallbackJobDetails = {
   id: "-1",
   title: "Frontend Developer Intern",
@@ -132,22 +130,19 @@ const JobDetail = () => {
       setIsSaving(false);
     }
   };
-
-  // Build the details object by injecting a varied prompt per job id (persisted in localStorage)
   const selectedId = id || fallbackJobDetails.id;
   const prompt = getPromptForJob(selectedId);
 
   const jobDetails = {
     ...fallbackJobDetails,
     id: selectedId,
-    // color fields below remain as defaults for fallback; if you later pull job-specific fields, merge here
     description: `${prompt}\n\n${fallbackJobDetails.description}`,
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
           <Button 
@@ -160,7 +155,7 @@ const JobDetail = () => {
           </Button>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
+            {}
             <div className="lg:col-span-2 space-y-8">
               <div>
                 <div className="flex items-start justify-between mb-4">
@@ -171,7 +166,7 @@ const JobDetail = () => {
                       {jobDetails.company}
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Button variant="outline" size="icon">
                       <Bookmark className="h-4 w-4" />
@@ -251,7 +246,7 @@ const JobDetail = () => {
               </div>
             </div>
 
-            {/* Sidebar */}
+            {}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-4">
                 <div className="gradient-card rounded-xl p-6 shadow-lg border space-y-4">
@@ -277,7 +272,7 @@ const JobDetail = () => {
 
                 <div className="bg-card rounded-xl p-6 shadow border space-y-4">
                   <h3 className="font-semibold text-lg">Job Overview</h3>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
                       <MapPin className="h-5 w-5 text-primary mt-0.5" />

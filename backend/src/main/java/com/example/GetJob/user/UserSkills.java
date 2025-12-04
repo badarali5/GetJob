@@ -21,6 +21,4 @@ public class UserSkills {
         this.skillName = skillName;
     }
 
-
-
 }

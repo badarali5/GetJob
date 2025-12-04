@@ -70,7 +70,7 @@ const Hero = () => {
     <>
       <section className="relative overflow-hidden bg-gradient-to-br from-accent via-background to-background">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        
+
         <div className="w-full px-5 py-24">
           <div className="space-y-6 animate-fade-in">
             <div className="inline-block">
@@ -82,7 +82,7 @@ const Hero = () => {
                 2,000+ new opportunities this week
               </span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight w-full px-5">
               Kickstart Your Career
             </h1>
@@ -312,7 +312,7 @@ const Hero = () => {
           </div>
         </div>
       </section>
-      
+
     </>
   );
 };

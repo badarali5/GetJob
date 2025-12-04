@@ -1,5 +1,4 @@
 
-
 export default class AVLTree<T> {
   private map: Map<string, T[]>;
 
@@ -14,13 +13,11 @@ export default class AVLTree<T> {
     list.push(value);
     this.map.set(k, list);
   }
-
-  // exact match
   search(key: string): T[] {
     if (!key) return [];
     return this.map.get(key.trim()) || [];
   }
-  
+
   searchByPrefix(prefix: string): string[] {
     if (!prefix) return [];
     const p = prefix.toLowerCase();

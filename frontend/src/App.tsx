@@ -21,7 +21,6 @@ function ScrollToHash() {
   React.useEffect(() => {
     if (!hash) return;
     const id = hash.replace('#', '');
-    // Wait a tick for the DOM to update after navigation
     const t = setTimeout(() => {
       const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });

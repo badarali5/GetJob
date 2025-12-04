@@ -9,8 +9,6 @@ import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AVLTree } from "@/lib/avlTree";
 import { reorderJobsToAvoidAdjacentDuplicates, getPromptForJob } from "@/lib/prompts";
-
-// shape returned by backend /jobs
 type BackendJob = {
   id: string;
   title?: string;
@@ -23,13 +21,9 @@ type BackendJob = {
   salaryRange?: string;
   skills?: string[];
 };
-
-// --- Salary helpers: parse, merge sort, binary search ---
 function parseSalaryToNumber(s?: string): number | null {
   if (!s) return null;
-  // Normalize: remove currency symbols, commas
   const cleaned = s.replace(/[$,]/g, '').trim();
-  // Handle ranges like "60k - 80k" or "60k-80k" or "60000-80000"
   const rangeMatch = cleaned.match(/(\d+[\d\.]*)\s*(k|m)?\s*(?:-|to)\s*(\d+[\d\.]*)\s*(k|m)?/i);
   if (rangeMatch) {
     const a = Number(rangeMatch[1]);
@@ -41,8 +35,6 @@ function parseSalaryToNumber(s?: string): number | null {
     const val = ((a * mulA) + (b * mulB)) / 2; // average
     return Number.isFinite(val) ? val : null;
   }
-
-  // Single number with optional suffix
   const singleMatch = cleaned.match(/(\d+[\d\.]*)\s*(k|m)?/i);
   if (singleMatch) {
     const num = Number(singleMatch[1]);
@@ -56,10 +48,8 @@ function parseSalaryToNumber(s?: string): number | null {
 }
 
 function getJobSalaryValue(job: BackendJob): number | null {
-  // Prefer explicit salaryRange; fallback: try to extract from description/title
   const v = parseSalaryToNumber(job.salaryRange || undefined);
   if (v !== null) return v;
-  // attempt to parse from description/title heuristically
   const combined = `${job.title || ''} ${job.description || ''}`;
   return parseSalaryToNumber(combined);
 }
@@ -74,7 +64,6 @@ function mergeSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
   while (i < left.length && j < right.length) {
     const lv = getJobSalaryValue(left[i]);
     const rv = getJobSalaryValue(right[j]);
-    // Treat nulls as lesser so they appear first; when filtering by min salary we'll skip them
     const lnum = lv === null ? -Infinity : lv;
     const rnum = rv === null ? -Infinity : rv;
     if (lnum <= rnum) {
@@ -87,10 +76,7 @@ function mergeSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
   while (j < right.length) out.push(right[j++]);
   return out;
 }
-
-// Heap sort implementation: sorts ascending by salary (nulls treated as -Infinity)
 function heapSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
-  // Copy to avoid mutating input
   const a = arr.slice();
   const n = a.length;
 
@@ -115,21 +101,14 @@ function heapSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
       heapify(size, smallest);
     }
   };
-
-  // Build min-heap
   for (let i = Math.floor(n / 2) - 1; i >= 0; i--) heapify(n, i);
-
-  // Extract elements to produce ascending array
   const out: BackendJob[] = [];
   const temp = a.slice();
   let size = n;
   while (size > 0) {
-    // root is smallest
     out.push(temp[0]);
-    // move last to root
     temp[0] = temp[size - 1];
     size--;
-    // heapify reduced heap
     const heapifyTemp = (s: number, rootIdx: number) => {
       let smallest = rootIdx;
       const l = 2 * rootIdx + 1;
@@ -150,8 +129,6 @@ function heapSortJobsBySalary(arr: BackendJob[]): BackendJob[] {
 
   return out;
 }
-
-// find first index where job salary >= target. Jobs with null salary are treated as -Infinity and ignored (i.e., they come before target)
 function binarySearchFirstAtLeast(sorted: BackendJob[], target: number): number {
   let lo = 0;
   let hi = sorted.length - 1;
@@ -171,7 +148,6 @@ function binarySearchFirstAtLeast(sorted: BackendJob[], target: number): number 
 }
 
 function filterJobsByMinSalary(jobList: BackendJob[], minSalary: number): BackendJob[] {
-  // Use heap sort to produce ascending order by salary, then binary search
   const sorted = heapSortJobsBySalary(jobList);
   const idx = binarySearchFirstAtLeast(sorted, minSalary);
   return sorted.slice(idx).filter(j => {
@@ -179,7 +155,6 @@ function filterJobsByMinSalary(jobList: BackendJob[], minSalary: number): Backen
     return v !== null && v >= minSalary;
   });
 }
-
 
 function timeAgo(dateLike?: string | null) {
   if (!dateLike) return '';
@@ -209,8 +184,6 @@ function extractSkillsFromJob(job: BackendJob): string[] {
   const text = `${job.title || ''} ${job.description || ''}`.toLowerCase();
   return commonSkills.filter(skill => text.includes(skill.toLowerCase()));
 }
-
-// --- MaxHeap for top-paying jobs ---
 class MaxHeap {
   private arr: BackendJob[];
   constructor(jobs: BackendJob[] = []) {
@@ -246,8 +219,6 @@ class MaxHeap {
     return result;
   }
 }
-
-// --- KMP for exact title matching ---
 function computeKMPTable(pattern: string): number[] {
   const table = Array(pattern.length).fill(0);
   let j = 0;
@@ -269,8 +240,6 @@ function kmpSearch(text: string, pattern: string): boolean {
   }
   return false;
 }
-
-// --- Boyer-Moore for description search ---
 function buildBadCharTable(pattern: string): Map<string, number> {
   const table = new Map<string, number>();
   for (let i = 0; i < pattern.length - 1; i++) table.set(pattern[i], pattern.length - 1 - i);
@@ -290,8 +259,6 @@ function boyerMooreSearch(text: string, pattern: string): boolean {
   }
   return false;
 }
-
-// --- HashMap for skill lookups ---
 class SkillHashMap {
   private map: Map<string, Set<string>>;
   constructor() { this.map = new Map(); }
@@ -304,8 +271,6 @@ class SkillHashMap {
   hasSkill(skill: string): boolean { return this.map.has(skill.toLowerCase()); }
   getAllSkills(): string[] { return Array.from(this.map.keys()); }
 }
-
-// --- Recommendation engine ---
 interface UserProfile {
   userId: string;
   skills: Set<string>;
@@ -418,22 +383,15 @@ const JobsFixed = () => {
         { id: "34", title: "SAP Consultant", companyName: "Enterprise Systems", location: "Rawalpindi, Pakistan", jobType: "Full-time", postedAt: "2024-10-29", description: "Implement SAP solutions for enterprise clients", salaryRange: "$120k - $160k", skills: ["SAP", "ERP", "Consulting"] },
         { id: "35", title: "Embedded Systems Engineer", companyName: "Hardware Co", location: "Peshawar, Pakistan", jobType: "Full-time", postedAt: "2024-10-28", description: "Develop embedded systems with C and C++", salaryRange: "$110k - $145k", skills: ["C", "C++", "Embedded"] },
       ];
-      // ========================================
-
-      // Reorder jobs to avoid adjacent identical prompts and inject prompt descriptions
       const prepared = reorderJobsToAvoidAdjacentDuplicates(results).map(r => ({
         ...r,
         description: `${getPromptForJob(r.id)}\n\n${r.description || ''}`
       }));
-
-      // Build AVL Tree for skill-based indexing
       const tree = new AVLTree<BackendJob>();
       prepared.forEach(job => {
         const skills = job.skills && job.skills.length > 0 ? job.skills : extractSkillsFromJob(job);
         skills.forEach(skill => tree.insert(skill, job));
       });
-
-          // Build AVL Tree for jobType indexing
           const jtTree = new AVLTree<BackendJob>();
           prepared.forEach(job => {
             const jt = (job.jobType || 'Unknown').toString().toLowerCase();
@@ -443,15 +401,13 @@ const JobsFixed = () => {
       setSkillTree(tree);
       setAllSkills(tree.getAllSkills());
       setJobTypeTree(jtTree);
-
-      // Build HashMap for skill lookups and recommendation engine
       const smap = new SkillHashMap();
       prepared.forEach(job => {
         const skills = job.skills && job.skills.length > 0 ? job.skills : extractSkillsFromJob(job);
         skills.forEach(skill => smap.addSkill(skill, job.id));
       });
       setSkillHashMap(smap);
-      
+
       const recEngine = new JobRecommendationEngine(smap);
       prepared.forEach(job => {
         const category = (job.jobType || 'Unknown').toString().toLowerCase();
@@ -468,37 +424,13 @@ const JobsFixed = () => {
       setLoading(false);
     }
   };
-
-  // ========== COMMENTED OUT LIVE SEARCH API ==========
-  // Debounced live search: queries backend /jobs/search when possible, falls back to client filtering
   const searchTimeout = useRef<number | null>(null);
   const handleLiveSearch = (q: string) => {
-    // clear previous timer
     if (searchTimeout.current) {
       window.clearTimeout(searchTimeout.current);
       searchTimeout.current = null;
     }
-
-    // Just filter client-side dataset (API search commented out)
     applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
-
-    // // debounce network calls
-    // searchTimeout.current = window.setTimeout(async () => {
-    //   try {
-    //     // try backend search endpoint first
-    //     const path = `/jobs/search?title=${encodeURIComponent(q)}`;
-    //     const remote = await getJson<BackendJob[]>(path);
-    //     if (remote && Array.isArray(remote)) {
-    //       // replace job list with remote results and apply other filters
-    //       setJobs(remote);
-    //       applyFilters(remote, q, loc, workplace, jobTypeFilter, selectedSkills);
-    //       return;
-    //     }
-    //   } catch (err) {
-    //     // network or endpoint not available — fall back to client filtering
-    //     applyFilters(jobs, q, loc, workplace, jobTypeFilter, selectedSkills);
-    //   }
-    // }, 300) as unknown as number;
   };
 
   const applyFilters = (
@@ -517,11 +449,8 @@ const JobsFixed = () => {
         const title = (j.title || '').toLowerCase();
         const desc = (j.description || '').toLowerCase();
         const company = (j.companyName || '').toLowerCase();
-        // Use KMP for title exact matching
         const titleMatch = kmpSearch(title, q);
-        // Use Boyer-Moore for description search
         const descMatch = boyerMooreSearch(desc, q);
-        // Also check company name substring
         const companyMatch = company.includes(q);
         return titleMatch || descMatch || companyMatch;
       });
@@ -538,7 +467,6 @@ const JobsFixed = () => {
     if (jobType && jobType.trim() !== '') {
       const jtNorm = jobType.toLowerCase();
       if (jtNorm !== 'all') {
-        // Use the AVL jobType index when available for O(log n) lookup + set intersection
         if (jobTypeTree) {
           const jobsWithType = jobTypeTree.search(jtNorm);
           const typeSet = new Set(jobsWithType.map(j => j.id));
@@ -550,19 +478,15 @@ const JobsFixed = () => {
     }
 
     if (salaryFilter && salaryFilter.trim() !== '') {
-      // Try to parse the salaryFilter as a numeric minimum (e.g. "80k", "80000", "$80k")
       const parsed = parseSalaryToNumber(salaryFilter);
       if (parsed !== null) {
-        // Use merge sort + binary search to efficiently find jobs >= parsed
         results = filterJobsByMinSalary(results, parsed);
       } else {
-        // Fallback to substring match if parsing fails
         results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(salaryFilter.toLowerCase()));
       }
     }
 
     if (skills.length > 0 && skillHashMap) {
-      // Use HashMap for quick skill lookups
       const jobsBySkillId = new Set<string>();
       skills.forEach(skill => {
         const jobIds = skillHashMap.getJobsBySkill(skill);
@@ -580,8 +504,6 @@ const JobsFixed = () => {
 
     setFilteredJobs(results);
   };
-
-  // Get top N paying jobs using MaxHeap
   const getTopPayingJobs = (topN: number = 10): BackendJob[] => {
     const heap = new MaxHeap(jobs);
     return heap.topK(topN);
@@ -593,7 +515,6 @@ const JobsFixed = () => {
     if (opts.workplace) setWorkplace(opts.workplace);
     if (opts.jobType) setJobTypeFilter(opts.jobType.toLowerCase());
     if (opts.salary) setSalaryFilter(opts.salary);
-    // Note: fetchJobs is called via useEffect when URL parameters change
   };
 
   useEffect(() => {
@@ -603,23 +524,15 @@ const JobsFixed = () => {
     const wp = params.get('workplace') || '';
     const jt = params.get('type') || '';
     const sal = params.get('salary') || '';
-    
-    // Update search fields
     if (q) setSearchTerm(q);
     if (l) setLoc(l);
     if (wp) setWorkplace(wp);
     if (jt) setJobTypeFilter(jt.toLowerCase());
     if (sal) setSalaryFilter(sal);
-    
-    // Always fetch jobs (with or without filters)
     void fetchJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationHook.search]);
-
-  // Apply filters whenever jobs or filter state changes
   useEffect(() => {
     applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobs, searchTerm, loc, workplace, jobTypeFilter, selectedSkills, salaryFilter]);
 
   return (
@@ -759,25 +672,8 @@ const JobsFixed = () => {
                   <p className="text-muted-foreground">Showing <span className="font-semibold text-foreground">{filteredJobs.length || jobs.length}</span> opportunities</p>
 
                   <div className="flex items-center gap-3">
-                    {/* ========== COMMENTED OUT SYNC API ========== */}
-                    {/* <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={async () => {
-                        try {
-                          setLoading(true);
-                          await getJson<string>('/jobs/sync');
-                          await fetchJobs();
-                        } catch (e) {
-                          console.error(e);
-                          setError('Sync failed');
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
-                    >
-                      {loading ? 'Syncing' : 'Sync jobs'}
-                    </Button> */}
+                    {}
+                    {}
 
                     <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setShowFilters(!showFilters)}>
                       <SlidersHorizontal className="h-4 w-4 mr-2" />

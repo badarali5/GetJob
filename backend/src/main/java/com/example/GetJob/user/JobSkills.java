@@ -12,5 +12,4 @@ public class JobSkills {
         this.skill = skill;
     }
 
-
 }

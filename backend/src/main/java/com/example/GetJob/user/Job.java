@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
 @Entity
 @Table(name = "job")
 @Data
@@ -20,24 +19,18 @@ public class Job {
     private Long id;
 
     private String title;
-
-    // location as provided by the external API
     private String location;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
     private String salaryRange;
-
-    // jobType / type of job
     private String jobType;
 
     @Column(columnDefinition = "TEXT")
     private String applyUrl;
 
     private String source;
-
-    // store posted timestamp as LocalDateTime
     private LocalDateTime postedAt;
 
     private LocalDateTime createdAt = LocalDateTime.now();

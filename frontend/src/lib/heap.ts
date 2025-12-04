@@ -1,41 +1,34 @@
 
-
 export interface Prioritizable {
   id: string;
   priority: number;
 }
-
 
 export class MaxHeap<T extends Prioritizable> {
   private items: T[];
 
   constructor(items: T[] = []) {
     this.items = [];
-    
+
     items.forEach(item => this.insert(item));
   }
 
-  
   private getParentIndex(index: number): number {
     return Math.floor((index - 1) / 2);
   }
 
-  
   private getLeftChildIndex(index: number): number {
     return 2 * index + 1;
   }
 
-  
   private getRightChildIndex(index: number): number {
     return 2 * index + 2;
   }
 
-  
   private swap(index1: number, index2: number): void {
     [this.items[index1], this.items[index2]] = [this.items[index2], this.items[index1]];
   }
 
-  
   private bubbleUp(index: number): void {
     while (index > 0) {
       const parentIndex = this.getParentIndex(index);
@@ -48,7 +41,6 @@ export class MaxHeap<T extends Prioritizable> {
     }
   }
 
-  
   private bubbleDown(index: number): void {
     while (true) {
       let largestIndex = index;
@@ -78,18 +70,15 @@ export class MaxHeap<T extends Prioritizable> {
     }
   }
 
-  
   insert(item: T): void {
     this.items.push(item);
     this.bubbleUp(this.items.length - 1);
   }
 
-  
   peek(): T | undefined {
     return this.items[0];
   }
 
-  
   extract(): T | undefined {
     if (this.items.length === 0) return undefined;
     if (this.items.length === 1) return this.items.pop();
@@ -100,7 +89,6 @@ export class MaxHeap<T extends Prioritizable> {
     return root;
   }
 
-  
   toArray(): T[] {
     const sorted: T[] = [];
     const tempHeap = new MaxHeap([...this.items]);
@@ -111,22 +99,18 @@ export class MaxHeap<T extends Prioritizable> {
     return sorted;
   }
 
-  
   size(): number {
     return this.items.length;
   }
 
-  
   isEmpty(): boolean {
     return this.items.length === 0;
   }
 
-  
   clear(): void {
     this.items = [];
   }
 }
-
 
 export class MinHeap<T extends Prioritizable> {
   private items: T[];

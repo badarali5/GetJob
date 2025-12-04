@@ -18,28 +18,28 @@ public class SecurityConfig {
             HttpSecurity http, 
             CorsConfigurationSource corsConfigurationSource
     ) throws Exception {
-        
+
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
-            
+
             .csrf(csrf -> csrf.disable())
-            
+
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                
+
                 .requestMatchers("/api/auth/**").permitAll()
-                
+
                 .requestMatchers("/jobs/**").permitAll()
-                
+
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                
+
                 .anyRequest().authenticated()
             )
-            
+
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             );
-            
+
         return http.build();
     }
 }

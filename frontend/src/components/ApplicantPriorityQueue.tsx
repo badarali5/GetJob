@@ -22,13 +22,6 @@ interface ApplicantPriorityQueueProps {
   limit?: number;
 }
 
-/**
- * Applicant Priority Queue Component
- * Sorts applicants by:
- * 1. Skill Match (weight: 40%)
- * 2. Resume Score (weight: 35%)
- * 3. Experience (weight: 25%)
- */
 export const ApplicantPriorityQueue: React.FC<ApplicantPriorityQueueProps> = ({
   applicants,
   jobTitle = "Applicants",
@@ -36,8 +29,6 @@ export const ApplicantPriorityQueue: React.FC<ApplicantPriorityQueueProps> = ({
 }) => {
   const rankedApplicants = useMemo(() => {
     if (!applicants || applicants.length === 0) return [];
-
-    // Calculate composite priority score
     const scored = applicants.map(applicant => ({
       ...applicant,
       priority:
@@ -45,8 +36,6 @@ export const ApplicantPriorityQueue: React.FC<ApplicantPriorityQueueProps> = ({
         applicant.resumeScore * 0.35 +
         Math.min(applicant.experience * 5, 100) * 0.25, // Cap experience at 100
     }));
-
-    // Use MaxHeap to get top applicants
     const heap = new MaxHeap(scored);
     const result: typeof scored = [];
     let count = 0;
@@ -110,7 +99,7 @@ export const ApplicantPriorityQueue: React.FC<ApplicantPriorityQueueProps> = ({
                     </div>
 
                     <div className="grid grid-cols-3 gap-3 mt-3">
-                      {/* Skill Match */}
+                      {}
                       <div className="space-y-1">
                         <p className="text-xs text-muted-foreground">Skill Match</p>
                         <div className="flex items-center gap-2">
@@ -126,7 +115,7 @@ export const ApplicantPriorityQueue: React.FC<ApplicantPriorityQueueProps> = ({
                         </div>
                       </div>
 
-                      {/* Resume Score */}
+                      {}
                       <div className="space-y-1">
                         <p className="text-xs text-muted-foreground">Resume Score</p>
                         <div className="flex items-center gap-2">
@@ -142,7 +131,7 @@ export const ApplicantPriorityQueue: React.FC<ApplicantPriorityQueueProps> = ({
                         </div>
                       </div>
 
-                      {/* Experience */}
+                      {}
                       <div className="space-y-1">
                         <p className="text-xs text-muted-foreground">Experience</p>
                         <p className="text-sm font-semibold">
@@ -152,7 +141,7 @@ export const ApplicantPriorityQueue: React.FC<ApplicantPriorityQueueProps> = ({
                     </div>
                   </div>
 
-                  {/* Composite Score Badge */}
+                  {}
                   <div className="ml-4">
                     <Badge className={`text-lg px-3 py-1 ${getScoreBadge(applicant.priority)}`}>
                       {applicant.priority.toFixed(1)}

@@ -23,9 +23,9 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
-    <!-- ===================== -->
-    <!--      DEPENDENCIES     -->
-    <!-- ===================== -->
+    
+    
+    
     <dependencies>
 
         <dependency>
@@ -64,7 +64,7 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
-        <!-- JWT -->
+        
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -83,7 +83,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Lombok -->
+        
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -91,7 +91,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Testing -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -106,13 +106,13 @@
 
     </dependencies>
 
-    <!-- ===================== -->
-    <!--        BUILD          -->
-    <!-- ===================== -->
+    
+    
+    
     <build>
         <plugins>
 
-            <!-- Lombok Annotation Processor -->
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -128,7 +128,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Spring Boot Plugin -->
+            
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

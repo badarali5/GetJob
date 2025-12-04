@@ -12,7 +12,7 @@ const Employers: React.FC = () => {
       <Navbar />
 
       <main className="flex-1">
-        {/* Hero Section */}
+        {}
         <section className="bg-gradient-to-r from-primary/10 to-primary-glow/10 py-20 border-b">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
@@ -39,7 +39,7 @@ const Employers: React.FC = () => {
           </div>
         </section>
 
-        {/* How it Works */}
+        {}
         <section className="py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-12 text-center">How Our Ranking Works</h2>

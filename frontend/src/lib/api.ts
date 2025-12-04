@@ -2,9 +2,6 @@
 const env = import.meta.env as { VITE_API_URL?: string, MODE?: string };
 let API_BASE = (env.VITE_API_URL || '').replace(/\/$/, '');
 
-
-
-
 if (!API_BASE && typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') {
@@ -24,7 +21,6 @@ async function request(path: string, opts: RequestInit = {}) {
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
-
 
     const optsHeaders = opts.headers;
     if (optsHeaders) {
@@ -67,8 +63,6 @@ export const putJson = async <T = unknown>(path: string, data: unknown): Promise
     (await request(path, { method: 'PUT', body: JSON.stringify(data) })) as T;
 export const delJson = async <T = unknown>(path: string): Promise<T> =>
     (await request(path, { method: 'DELETE' })) as T;
-
-// Auth helpers
 export function signup(data: { name: string; email: string; password: string; role: string }) {
     return postJson('/api/auth/signup', data);
 }
@@ -95,8 +89,6 @@ export function getUser() {
         return null;
     }
 }
-
-// Job application and saving
 export function applyForJob(userId: number, jobId: string) {
     return postJson(`/jobs/apply?userId=${userId}&jobId=${encodeURIComponent(jobId)}`, {});
 }

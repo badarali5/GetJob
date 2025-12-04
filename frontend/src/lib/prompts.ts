@@ -41,20 +41,15 @@ export function getOrAssignPromptIndex(jobId: string): number {
   const map = loadMap();
   const counts = loadCounts();
   if (map[jobId] !== undefined) return map[jobId];
-
-  // Try random order to distribute assignments
   const indices = [...Array(PROMPTS.length).keys()];
   for (let i = indices.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [indices[i], indices[j]] = [indices[j], indices[i]];
   }
-
-  // Prefer indices with counts < 5
   let chosen = -1;
   for (const idx of indices) {
     if (counts[idx] < 5) { chosen = idx; break; }
   }
-  // If all reached 5, pick the one with smallest count
   if (chosen === -1) {
     let min = Infinity; let minIdx = 0;
     counts.forEach((c, i) => { if (c < min) { min = c; minIdx = i; } });
@@ -72,11 +67,8 @@ export function getPromptForJob(jobId: string): string {
   const idx = getOrAssignPromptIndex(jobId);
   return PROMPTS[idx] || PROMPTS[0];
 }
-
-// Reorder jobs array so that jobs with the same prompt index are not adjacent when possible
 export function reorderJobsToAvoidAdjacentDuplicates<T extends { id: string }>(jobs: T[]): T[] {
   if (!jobs || jobs.length <= 1) return jobs.slice();
-  // Group by prompt index
   const groups = new Map<number, T[]>();
   for (const job of jobs) {
     const idx = getOrAssignPromptIndex(job.id.toString());
@@ -84,8 +76,6 @@ export function reorderJobsToAvoidAdjacentDuplicates<T extends { id: string }>(j
     arr.push(job);
     groups.set(idx, arr);
   }
-
-  // Build max-heap-like array of [idx, arr]
   const heap: Array<{idx:number, arr:T[]}> = [];
   groups.forEach((arr, idx) => heap.push({idx, arr: arr.slice()}));
 
@@ -93,7 +83,6 @@ export function reorderJobsToAvoidAdjacentDuplicates<T extends { id: string }>(j
   let prevIdx: number | null = null;
 
   while (heap.length > 0) {
-    // sort by remaining size descending
     heap.sort((a,b) => b.arr.length - a.arr.length);
     let pickIndex = -1;
     for (let i=0;i<heap.length;i++) {

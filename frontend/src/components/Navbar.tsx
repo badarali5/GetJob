@@ -6,7 +6,7 @@ const Navbar = () => {
   return (
     <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-800">
       <div className="container mx-auto px-0 h-20 flex items-center justify-between">
-        
+
         <div className="flex items-center">
           <Link 
             to="/" 
