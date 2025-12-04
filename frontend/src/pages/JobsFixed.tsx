@@ -424,6 +424,7 @@ const JobsFixed = () => {
         { id: "33", title: "Salesforce Developer", companyName: "CRM Solutions", location: "Islamabad, Pakistan", jobType: "Full-time", postedAt: "2024-10-30", description: "Customize Salesforce with Apex and Lightning", salaryRange: "$105k - $140k", skills: ["Salesforce", "Apex", "CRM"] },
         { id: "34", title: "SAP Consultant", companyName: "Enterprise Systems", location: "Rawalpindi, Pakistan", jobType: "Full-time", postedAt: "2024-10-29", description: "Implement SAP solutions for enterprise clients", salaryRange: "$120k - $160k", skills: ["SAP", "ERP", "Consulting"] },
         { id: "35", title: "Embedded Systems Engineer", companyName: "Hardware Co", location: "Peshawar, Pakistan", jobType: "Full-time", postedAt: "2024-10-28", description: "Develop embedded systems with C and C++", salaryRange: "$110k - $145k", skills: ["C", "C++", "Embedded"] },
+      ];
       // ========================================
 
       // Build AVL Tree for skill-based indexing
@@ -454,7 +455,7 @@ const JobsFixed = () => {
       
       const recEngine = new JobRecommendationEngine(smap);
       results.forEach(job => {
-        const category = job.jobType || 'Unknown';
+        const category = (job.jobType || 'Unknown').toString().toLowerCase();
         recEngine.addJobToCategory(job.id, category);
       });
       setRecommendationEngine(recEngine);
@@ -535,14 +536,17 @@ const JobsFixed = () => {
       results = results.filter(j => (j.location || '').toLowerCase().includes('remote'));
     }
 
-    if (jobType && jobType.trim() !== '' && jobType !== 'all') {
-      // Use the AVL jobType index when available for O(log n) lookup + set intersection
-      if (jobTypeTree) {
-        const jobsWithType = jobTypeTree.search(jobType.toLowerCase());
-        const typeSet = new Set(jobsWithType.map(j => j.id));
-        results = results.filter(j => typeSet.has(j.id));
-      } else {
-        results = results.filter(j => (j.jobType || '').toLowerCase() === jobType.toLowerCase());
+    if (jobType && jobType.trim() !== '') {
+      const jtNorm = jobType.toLowerCase();
+      if (jtNorm !== 'all') {
+        // Use the AVL jobType index when available for O(log n) lookup + set intersection
+        if (jobTypeTree) {
+          const jobsWithType = jobTypeTree.search(jtNorm);
+          const typeSet = new Set(jobsWithType.map(j => j.id));
+          results = results.filter(j => typeSet.has(j.id));
+        } else {
+          results = results.filter(j => (j.jobType || '').toLowerCase() === jtNorm);
+        }
       }
     }
 
@@ -588,7 +592,7 @@ const JobsFixed = () => {
     setSearchTerm(q);
     setLoc(l);
     if (opts.workplace) setWorkplace(opts.workplace);
-    if (opts.jobType) setJobTypeFilter(opts.jobType);
+    if (opts.jobType) setJobTypeFilter(opts.jobType.toLowerCase());
     if (opts.salary) setSalaryFilter(opts.salary);
     // Note: fetchJobs is called via useEffect when URL parameters change
   };
@@ -605,7 +609,7 @@ const JobsFixed = () => {
     if (q) setSearchTerm(q);
     if (l) setLoc(l);
     if (wp) setWorkplace(wp);
-    if (jt) setJobTypeFilter(jt);
+    if (jt) setJobTypeFilter(jt.toLowerCase());
     if (sal) setSalaryFilter(sal);
     
     // Always fetch jobs (with or without filters)
