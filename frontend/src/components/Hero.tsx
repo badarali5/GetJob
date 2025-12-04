@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Briefcase } from "lucide-react";
-import { useState } from "react";
+import { Search, MapPin, Briefcase, ChevronDown, TrendingUp, Users, Award } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Hero = () => {
   const [title, setTitle] = useState('');
@@ -10,7 +11,23 @@ const Hero = () => {
   const [workplace, setWorkplace] = useState('');
   const [jobType, setJobType] = useState('');
   const [salary, setSalary] = useState('');
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const locationOptions = ['Remote', 'Karachi', 'Lahore', 'Rawalpindi', 'Faisalabad', 'Multan', 'Islamabad', 'Peshawar'];
+  const jobTypeOptions = ['Full-time', 'Part-time', 'Internship', 'Contract', 'Freelance'];
+  const salaryOptions = ['$0 - $30k', '$30k - $60k', '$60k - $100k', '$100k - $150k', '$150k+'];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const performSearch = (overrides: Partial<{ q: string; loc: string; workplace: string; type: string; salary: string }> = {}) => {
     const q = overrides.q ?? title;
@@ -29,6 +46,24 @@ const Hero = () => {
     const queryString = params.toString();
     const url = queryString ? `/jobs?${queryString}` : '/jobs';
     navigate(url);
+  };
+
+  const handleLocationSelect = (loc: string) => {
+    setLocation(loc);
+    setOpenDropdown(null);
+    performSearch({ loc });
+  };
+
+  const handleJobTypeSelect = (type: string) => {
+    setJobType(type);
+    setOpenDropdown(null);
+    performSearch({ type });
+  };
+
+  const handleSalarySelect = (sal: string) => {
+    setSalary(sal);
+    setOpenDropdown(null);
+    performSearch({ salary: sal });
   };
 
   return (
@@ -108,62 +143,187 @@ const Hero = () => {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <button
-                      className={`px-3 py-1 rounded-md text-sm ${location.trim() ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
-                      onClick={() => {
-                        if (location.trim()) {
-                          performSearch({ loc: location });
-                        }
-                      }}
-                      disabled={!location.trim()}
-                    >
-                      <MapPin className="w-4 h-4 inline mr-1" />
-                      Search by Location
-                    </button>
+                  <div className="mt-4 flex flex-wrap items-center gap-3" ref={dropdownRef}>
+                    {/* Location Dropdown */}
+                    <div className="relative">
+                      <button
+                        className={`px-4 py-2 rounded-md text-sm flex items-center gap-2 transition-all ${
+                          location ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'
+                        }`}
+                        onClick={() => setOpenDropdown(openDropdown === 'location' ? null : 'location')}
+                      >
+                        <MapPin className="w-4 h-4" />
+                        {location || 'Location'}
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {openDropdown === 'location' && (
+                        <div className="absolute top-full mt-2 left-0 bg-card border rounded-lg shadow-lg z-10 w-48">
+                          {locationOptions.map((loc) => (
+                            <button
+                              key={loc}
+                              onClick={() => handleLocationSelect(loc)}
+                              className={`w-full text-left px-4 py-2 hover:bg-primary/10 transition-colors ${
+                                location === loc ? 'bg-primary/20 text-primary font-medium' : ''
+                              }`}
+                            >
+                              {loc}
+                            </button>
+                          ))}
+                          {location && (
+                            <button
+                              onClick={() => {
+                                setLocation('');
+                                setOpenDropdown(null);
+                                performSearch({ loc: '' });
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-destructive/10 text-destructive border-t transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
-                    <button
-                      className={`px-3 py-1 rounded-md text-sm flex items-center gap-2 ${jobType === 'internship' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
-                      onClick={() => {
-                        const next = jobType === 'internship' ? '' : 'internship';
-                        setJobType(next);
-                        performSearch({ type: next });
-                      }}
-                    >
-                      <Briefcase className="w-4 h-4" />
-                      Type
-                    </button>
+                    {/* Job Type Dropdown */}
+                    <div className="relative">
+                      <button
+                        className={`px-4 py-2 rounded-md text-sm flex items-center gap-2 transition-all ${
+                          jobType ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'
+                        }`}
+                        onClick={() => setOpenDropdown(openDropdown === 'jobType' ? null : 'jobType')}
+                      >
+                        <Briefcase className="w-4 h-4" />
+                        {jobType || 'Job Type'}
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {openDropdown === 'jobType' && (
+                        <div className="absolute top-full mt-2 left-0 bg-card border rounded-lg shadow-lg z-10 w-48">
+                          {jobTypeOptions.map((type) => (
+                            <button
+                              key={type}
+                              onClick={() => handleJobTypeSelect(type)}
+                              className={`w-full text-left px-4 py-2 hover:bg-primary/10 transition-colors ${
+                                jobType === type ? 'bg-primary/20 text-primary font-medium' : ''
+                              }`}
+                            >
+                              {type}
+                            </button>
+                          ))}
+                          {jobType && (
+                            <button
+                              onClick={() => {
+                                setJobType('');
+                                setOpenDropdown(null);
+                                performSearch({ type: '' });
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-destructive/10 text-destructive border-t transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
-                    <button
-                      className={`px-3 py-1 rounded-md text-sm ${salary === 'any' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
-                      onClick={() => {
-                        const next = salary === 'any' ? '' : 'any';
-                        setSalary(next);
-                        performSearch({ salary: next });
-                      }}
-                    >
-                      Salary
-                    </button>
-
-
-                    {location && (
-                      <span className="ml-auto md:ml-0 bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">
-                        {location}
-                      </span>
-                    )}
+                    {/* Salary Dropdown */}
+                    <div className="relative">
+                      <button
+                        className={`px-4 py-2 rounded-md text-sm flex items-center gap-2 transition-all ${
+                          salary ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'
+                        }`}
+                        onClick={() => setOpenDropdown(openDropdown === 'salary' ? null : 'salary')}
+                      >
+                        {salary || 'Salary'}
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {openDropdown === 'salary' && (
+                        <div className="absolute top-full mt-2 left-0 bg-card border rounded-lg shadow-lg z-10 w-48">
+                          {salaryOptions.map((sal) => (
+                            <button
+                              key={sal}
+                              onClick={() => handleSalarySelect(sal)}
+                              className={`w-full text-left px-4 py-2 hover:bg-primary/10 transition-colors ${
+                                salary === sal ? 'bg-primary/20 text-primary font-medium' : ''
+                              }`}
+                            >
+                              {sal}
+                            </button>
+                          ))}
+                          {salary && (
+                            <button
+                              onClick={() => {
+                                setSalary('');
+                                setOpenDropdown(null);
+                                performSearch({ salary: '' });
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-destructive/10 text-destructive border-t transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="text-sm text-muted-foreground py-5">
-              Popular: 
-              <button className="text-foreground font-medium ml-1 mr-2" onClick={() => { setTitle('Software Engineer'); performSearch({ q: 'Software Engineer' }); }}>Software Engineer</button>,
-              <button className="text-foreground font-medium ml-1 mr-2" onClick={() => { setTitle('Marketing Intern'); performSearch({ q: 'Marketing Intern' }); }}>Marketing Intern</button>,
-              <button className="text-foreground font-medium ml-1" onClick={() => { setTitle('Data Analyst'); performSearch({ q: 'Data Analyst' }); }}>Data Analyst</button>
-            </p>
+            
           </div>
       
+        
+
+        {/* Why Choose GetJob? Section */}
+        <section className="py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-12 text-center">Why Choose GetJob?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-2">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Smart Applicant Ranking</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Our priority queue algorithm ranks applicants by skill match, resume quality, and experience.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Top Talent Discovery</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Find the best candidates instantly using our advanced sorting and filtering algorithms.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Award className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>Analytics & Insights</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Track job performance, trending opportunities, and make data-driven hiring decisions.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
     </section>
   );
 };
