@@ -9,6 +9,7 @@ import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 // API calls are disabled for JobsFixed; using hardcoded dataset instead
 import { AVLTree } from "@/lib/avlTree";
+import { reorderJobsToAvoidAdjacentDuplicates, getPromptForJob } from "@/lib/prompts";
 
 // shape returned by backend /jobs
 type BackendJob = {
@@ -427,16 +428,22 @@ const JobsFixed = () => {
       ];
       // ========================================
 
+      // Reorder jobs to avoid adjacent identical prompts and inject prompt descriptions
+      const prepared = reorderJobsToAvoidAdjacentDuplicates(results).map(r => ({
+        ...r,
+        description: `${getPromptForJob(r.id)}\n\n${r.description || ''}`
+      }));
+
       // Build AVL Tree for skill-based indexing
       const tree = new AVLTree<BackendJob>();
-      results.forEach(job => {
+      prepared.forEach(job => {
         const skills = job.skills && job.skills.length > 0 ? job.skills : extractSkillsFromJob(job);
         skills.forEach(skill => tree.insert(skill, job));
       });
 
           // Build AVL Tree for jobType indexing
           const jtTree = new AVLTree<BackendJob>();
-          results.forEach(job => {
+          prepared.forEach(job => {
             const jt = (job.jobType || 'Unknown').toString().toLowerCase();
             jtTree.insert(jt, job);
           });
@@ -447,20 +454,20 @@ const JobsFixed = () => {
 
       // Build HashMap for skill lookups and recommendation engine
       const smap = new SkillHashMap();
-      results.forEach(job => {
+      prepared.forEach(job => {
         const skills = job.skills && job.skills.length > 0 ? job.skills : extractSkillsFromJob(job);
         skills.forEach(skill => smap.addSkill(skill, job.id));
       });
       setSkillHashMap(smap);
       
       const recEngine = new JobRecommendationEngine(smap);
-      results.forEach(job => {
+      prepared.forEach(job => {
         const category = (job.jobType || 'Unknown').toString().toLowerCase();
         recEngine.addJobToCategory(job.id, category);
       });
       setRecommendationEngine(recEngine);
 
-      setJobs(results);
+      setJobs(prepared);
     } catch (err: any) {
       console.error('Failed to fetch jobs', err);
       setError(err?.message || 'Failed to fetch jobs. Make sure the backend is running on port 8081.');
