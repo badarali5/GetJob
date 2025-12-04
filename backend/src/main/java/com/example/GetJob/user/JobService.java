@@ -250,48 +250,57 @@ public class JobService {
     }
 
     public Application applyForJob(Long userId, String jobId) {
-        com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
+
+    com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // Convert jobId from String to Long if needed
-        Long jobIdLong;
-        try {
-            jobIdLong = Long.parseLong(jobId);
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid job ID format");
-        }
-        
-        Job job = jobRepository.findById(jobIdLong)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
-        
-        Application application = new Application();
-        application.setUser(user);
-        application.setJob(job);
-        application.setAppliedAt(java.time.LocalDateTime.now());
-        return applicationRepository.save(application);
+
+    Long jobIdLong;
+    try {
+        jobIdLong = Long.parseLong(jobId);
+    } catch (NumberFormatException e) {
+        throw new RuntimeException("Invalid job ID format");
     }
 
-    public SavedJobs saveJobForLater(Long userId, String jobId) {
-        com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // Convert jobId from String to Long if needed
-        Long jobIdLong;
-        try {
-            jobIdLong = Long.parseLong(jobId);
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid job ID format");
-        }
-        
-        Job job = jobRepository.findById(jobIdLong)
+    Job job = jobRepository.findById(jobIdLong)
             .orElseThrow(() -> new RuntimeException("Job not found"));
-        
-        SavedJobs savedJob = new SavedJobs();
-        savedJob.setUser(user);
-        savedJob.setJob(job);
-        savedJob.setSavedAt(java.time.LocalDateTime.now());
-        return savedJobsRepository.save(savedJob);
+
+    Application application = new Application();
+    application.setUser(user);
+    application.setJob(job);
+    application.setAppliedAt(java.time.LocalDateTime.now());
+
+    return applicationRepository.save(application);
+}
+
+
+    public SavedJobs saveJobForLater(Long userId, String jobId) {
+
+    com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    Long jobIdLong;
+    try {
+        jobIdLong = Long.parseLong(jobId);
+    } catch (NumberFormatException e) {
+        throw new RuntimeException("Invalid job ID format");
     }
+
+    Job job = jobRepository.findById(jobIdLong)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+
+    // Prevent duplicate saves
+    if (savedJobsRepository.existsByUser_IdAndJob_Id(userId, jobIdLong)) {
+        throw new RuntimeException("Job already saved by user");
+    }
+
+    SavedJobs saved = new SavedJobs();
+    saved.setUser(user);
+    saved.setJob(job);
+    saved.setSavedAt(java.time.LocalDateTime.now());
+
+    return savedJobsRepository.save(saved);
+}
+
 
 }
 

@@ -22,7 +22,6 @@ public class SavedJobs {
     @Column(nullable = false)
     private LocalDateTime savedAt;
 
-    // Constructors
     public SavedJobs() {}
 
     public SavedJobs(com.example.GetJob.auth.model.User user, Job job) {
@@ -31,7 +30,6 @@ public class SavedJobs {
         this.savedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
