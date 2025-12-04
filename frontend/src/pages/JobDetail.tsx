@@ -7,11 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Briefcase, Clock, Building2, DollarSign, ArrowLeft, Bookmark, Share2 } from "lucide-react";
 import { applyForJob, saveJobForLater, getUser } from "@/lib/api";
+import { getPromptForJob } from "@/lib/prompts";
 import { useToast } from "@/hooks/use-toast";
 
-// Sample job detail data
-const jobDetails = {
-  id: "1",
+// Fallback job detail template (used when concrete job data isn't found)
+const fallbackJobDetails = {
+  id: "-1",
   title: "Frontend Developer Intern",
   company: "TechCorp",
   location: "Lahore, Pakistan",
@@ -130,6 +131,17 @@ const JobDetail = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Build the details object by injecting a varied prompt per job id (persisted in localStorage)
+  const selectedId = id || fallbackJobDetails.id;
+  const prompt = getPromptForJob(selectedId);
+
+  const jobDetails = {
+    ...fallbackJobDetails,
+    id: selectedId,
+    // color fields below remain as defaults for fallback; if you later pull job-specific fields, merge here
+    description: `${prompt}\n\n${fallbackJobDetails.description}`,
   };
 
   return (
