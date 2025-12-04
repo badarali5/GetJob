@@ -86,6 +86,12 @@ const Hero = () => {
                         className="pl-16 pr-6 h-20 bg-background text-xl placeholder:text-muted-foreground w-full"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            performSearch();
+                          }
+                        }}
                       />
                     </div>
 
@@ -104,15 +110,16 @@ const Hero = () => {
 
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
-                      className={`px-3 py-1 rounded-md text-sm ${location === 'remote' ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
+                      className={`px-3 py-1 rounded-md text-sm ${location.trim() ? 'bg-primary text-white' : 'bg-card/60 text-muted-foreground border'}`}
                       onClick={() => {
-                        const next = location === 'remote' ? '' : 'remote';
-                        setLocation(next);
-                        performSearch({ loc: next });
+                        if (location.trim()) {
+                          performSearch({ loc: location });
+                        }
                       }}
+                      disabled={!location.trim()}
                     >
-                      <span className="sr-only">Location</span>
-                      Location
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Search by Location
                     </button>
 
                     <button
