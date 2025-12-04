@@ -8,6 +8,6 @@ import java.util.Optional;
 @Repository
 public interface SavedJobsRepository extends JpaRepository<SavedJobs, Long> {
     List<SavedJobs> findByUserId(Long userId);
-    Optional<SavedJobs> findByUserIdAndJobId(Long userId, String jobId);
-    boolean existsByUserIdAndJobId(Long userId, String jobId);
+    Optional<SavedJobs> findByUserIdAndJobId(Long userId, Long jobId);
+    boolean existsByUserIdAndJobId(Long userId, Long jobId);
 }
