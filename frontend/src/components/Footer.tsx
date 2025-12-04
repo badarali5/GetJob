@@ -116,7 +116,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Link to="/" className="hover:text-foreground transition-colors">About Us</Link>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -126,7 +126,7 @@ const Footer = () => {
               </li>
               <li>
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Link to="/" className="hover:text-foreground transition-colors">Blog</Link>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -136,7 +136,7 @@ const Footer = () => {
               </li>
               <li>
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Link to="/" className="hover:text-foreground transition-colors">Contact</Link>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -146,7 +146,7 @@ const Footer = () => {
               </li>
               <li>
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Link to="/" className="hover:text-foreground transition-colors">Privacy Policy</Link>
                   </TooltipTrigger>
                   <TooltipContent>
