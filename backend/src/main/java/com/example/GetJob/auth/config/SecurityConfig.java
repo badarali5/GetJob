@@ -18,22 +18,41 @@ public class SecurityConfig {
      * Uses the CORS configuration from CorsConfig bean
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http, 
+            CorsConfigurationSource corsConfigurationSource
+    ) throws Exception {
+        
         http
-            // Enable CORS with single configuration source from CorsConfig bean
+            // Enable CORS with the injected configuration source
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
-            // CSRF protection is disabled for stateless REST API with JWT authentication
-            // where each request is authenticated via the token, not session cookies
+            
+            // Disable CSRF for stateless REST API
             .csrf(csrf -> csrf.disable())
+            
+            // Configure authorization
             .authorizeHttpRequests(auth -> auth
+                // Allow preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                
+                // Allow auth endpoints without authentication
                 .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().permitAll()
+                
+                // Allow job endpoints for browsing
+                .requestMatchers("/jobs/**").permitAll()
+                
+                // Allow Swagger/OpenAPI documentation if available
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                
+                // All other requests require authentication
+                .anyRequest().authenticated()
             )
+            
+            // Set session management to stateless
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             );
-
+            
         return http.build();
     }
 }
