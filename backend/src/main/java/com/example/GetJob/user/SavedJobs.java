@@ -17,29 +17,27 @@ public class SavedJobs {
 
     @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
-    private Long job;
+    private Job job;
 
     @Column(nullable = false)
     private LocalDateTime savedAt;
 
-    // Constructors
     public SavedJobs() {}
 
-    public SavedJobs(com.example.GetJob.auth.model.User user, Long job) {
+    public SavedJobs(com.example.GetJob.auth.model.User user, Job job) {
         this.user = user;
         this.job = job;
         this.savedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
     public com.example.GetJob.auth.model.User getUser() { return user; }
     public void setUser(com.example.GetJob.auth.model.User user) { this.user = user; }
 
-    public Long getJob() { return job; }
-    public void setJob(Long job) { this.job = job; }
+    public Job getJob() { return job; }
+    public void setJob(Job job) { this.job = job; }
 
     public LocalDateTime getSavedAt() { return savedAt; }
     public void setSavedAt(LocalDateTime savedAt) { this.savedAt = savedAt; }
