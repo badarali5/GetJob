@@ -1,10 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Briefcase, Clock, Building2, DollarSign, ArrowLeft, Bookmark, Share2 } from "lucide-react";
+import { applyForJob, saveJobForLater, getUser } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 // Sample job detail data
 const jobDetails = {
@@ -43,6 +46,91 @@ Our mission is to create software that makes people's lives easier. We value cre
 const JobDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isApplying, setIsApplying] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
+
+  const handleApply = async () => {
+    const user = getUser();
+    if (!user || !user.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to apply for jobs.",
+        variant: "destructive",
+      });
+      navigate("/signin");
+      return;
+    }
+
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Job ID is missing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsApplying(true);
+    try {
+      await applyForJob(user.id, id);
+      setHasApplied(true);
+      toast({
+        title: "Success!",
+        description: "Your application has been submitted successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to apply for job. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  const handleSaveForLater = async () => {
+    const user = getUser();
+    if (!user || !user.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save jobs.",
+        variant: "destructive",
+      });
+      navigate("/signin");
+      return;
+    }
+
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Job ID is missing.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await saveJobForLater(user.id, id);
+      setHasSaved(true);
+      toast({
+        title: "Success!",
+        description: "Job saved for later.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to save job. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -155,11 +243,23 @@ const JobDetail = () => {
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-4">
                 <div className="gradient-card rounded-xl p-6 shadow-lg border space-y-4">
-                  <Button variant="hero" size="lg" className="w-full">
-                    Apply Now
+                  <Button 
+                    variant="hero" 
+                    size="lg" 
+                    className="w-full"
+                    onClick={handleApply}
+                    disabled={isApplying || hasApplied}
+                  >
+                    {isApplying ? "Applying..." : hasApplied ? "Applied ✓" : "Apply Now"}
                   </Button>
-                  <Button variant="outline" size="lg" className="w-full">
-                    Save for Later
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full"
+                    onClick={handleSaveForLater}
+                    disabled={isSaving || hasSaved}
+                  >
+                    {isSaving ? "Saving..." : hasSaved ? "Saved ✓" : "Save for Later"}
                   </Button>
                 </div>
 

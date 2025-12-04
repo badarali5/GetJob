@@ -89,3 +89,23 @@ export function getToken() {
 export function clearToken() {
     localStorage.removeItem('token');
 }
+
+// User helpers
+export function getUser() {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try {
+        return JSON.parse(userStr);
+    } catch {
+        return null;
+    }
+}
+
+// Job application and saving
+export function applyForJob(userId: number, jobId: string) {
+    return postJson(`/jobs/apply?userId=${userId}&jobId=${encodeURIComponent(jobId)}`, {});
+}
+
+export function saveJobForLater(userId: number, jobId: string) {
+    return postJson(`/jobs/save?userId=${userId}&jobId=${encodeURIComponent(jobId)}`, {});
+}

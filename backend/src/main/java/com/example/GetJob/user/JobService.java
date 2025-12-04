@@ -22,8 +22,11 @@ public class JobService {
     private final UserRepository userRepository;
 
     @Autowired
-    public JobService(JobRepository jobRepository) {
+    public JobService(JobRepository jobRepository, ApplicationRepository applicationRepository, SavedJobsRepository savedJobsRepository, UserRepository userRepository) {
         this.jobRepository = jobRepository;
+        this.applicationRepository = applicationRepository;
+        this.savedJobsRepository = savedJobsRepository;
+        this.userRepository = userRepository;
     }
 
     @Value("${jsearch.api.key}")
@@ -244,6 +247,26 @@ public class JobService {
             }
         }
         return saved;
+    }
+
+    public Application applyForJob(Long userId, String jobId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        Application application = new Application();
+        application.setUser(user);
+        application.setJob(job);
+        application.setAppliedAt(java.time.LocalDateTime.now());
+        return applicationRepository.save(application);
+    }
+
+    public SavedJobs saveJobForLater(Long userId, String jobId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        SavedJobs savedJob = new SavedJobs();
+        savedJob.setUser(user);
+        savedJob.setJob(job);
+        savedJob.setSavedAt(java.time.LocalDateTime.now());
+        return savedJobsRepository.save(savedJob);
     }
 
 }

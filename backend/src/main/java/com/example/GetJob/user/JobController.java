@@ -47,4 +47,28 @@ public class JobController {
     public ResponseEntity<List<Job>> search(@RequestParam("title") String title) {
         return ResponseEntity.ok(jobService.searchJobs(title));
     }
+
+    @PostMapping("/apply")
+    public ResponseEntity<Application> applyForJob(@RequestParam("userId") Long userId, @RequestParam("jobId") String jobId) {
+        try {
+            Application application = jobService.applyForJob(userId, jobId);
+            return ResponseEntity.ok(application);
+        } catch (Exception ex) {
+            logger.error("Failed to apply for job", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(null);
+        }
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<SavedJobs> saveJobForLater(@RequestParam("userId") Long userId, @RequestParam("jobId") String jobId) {
+        try {
+            SavedJobs savedJob = jobService.saveJobForLater(userId, jobId);
+            return ResponseEntity.ok(savedJob);
+        } catch (Exception ex) {
+            logger.error("Failed to save job for later", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(null);
+        }
+    }
 }

@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Briefcase, Clock, Bookmark } from "lucide-react";
+import { MapPin, Briefcase, Clock, Bookmark, BookmarkCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { saveJobForLater, getUser } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface JobCardProps {
   id: string;
@@ -17,6 +20,42 @@ interface JobCardProps {
 
 const JobCard = ({ id, title, company, location, type, postedDate, logo, tags = [] }: JobCardProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const user = getUser();
+    if (!user || !user.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save jobs.",
+        variant: "destructive",
+      });
+      navigate("/signin");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await saveJobForLater(user.id, id);
+      setIsSaved(true);
+      toast({
+        title: "Success!",
+        description: "Job saved for later.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to save job. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Card className="p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] cursor-pointer gradient-card group">
@@ -44,13 +83,15 @@ const JobCard = ({ id, title, company, location, type, postedDate, logo, tags = 
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Handle bookmark
-            }}
+            onClick={handleBookmark}
+            disabled={isSaving || isSaved}
             className="flex-shrink-0"
           >
-            <Bookmark className="h-4 w-4" />
+            {isSaved ? (
+              <BookmarkCheck className="h-4 w-4 fill-current" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
           </Button>
         </div>
 
