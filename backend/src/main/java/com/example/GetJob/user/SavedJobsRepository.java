@@ -17,4 +17,7 @@ public interface SavedJobsRepository extends JpaRepository<SavedJobs, Long> {
 
     // Fast exists check for duplicates
     boolean existsByUser_IdAndJob_Id(Long userId, Long jobId);
+    List<SavedJobs> findByUserId(Long userId);
+    Optional<SavedJobs> findByUserIdAndJobId(Long userId, Long jobId);
+    boolean existsByUserIdAndJobId(Long userId, Long jobId);
 }
