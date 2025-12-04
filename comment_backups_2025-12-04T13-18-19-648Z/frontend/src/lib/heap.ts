@@ -1,41 +1,57 @@
-
+/**
+ * Max Heap implementation for priority queue operations
+ * Used for: Top Jobs, Trending Jobs, Best Applicants ranking
+ */
 
 export interface Prioritizable {
   id: string;
   priority: number;
 }
 
-
+/**
+ * Max Heap class - maintains heap property where parent >= children
+ * Supports O(log n) insert and O(1) peek, O(log n) extract
+ */
 export class MaxHeap<T extends Prioritizable> {
   private items: T[];
 
   constructor(items: T[] = []) {
     this.items = [];
-    
+    // Build heap from initial items
     items.forEach(item => this.insert(item));
   }
 
-  
+  /**
+   * Get parent index
+   */
   private getParentIndex(index: number): number {
     return Math.floor((index - 1) / 2);
   }
 
-  
+  /**
+   * Get left child index
+   */
   private getLeftChildIndex(index: number): number {
     return 2 * index + 1;
   }
 
-  
+  /**
+   * Get right child index
+   */
   private getRightChildIndex(index: number): number {
     return 2 * index + 2;
   }
 
-  
+  /**
+   * Swap two elements
+   */
   private swap(index1: number, index2: number): void {
     [this.items[index1], this.items[index2]] = [this.items[index2], this.items[index1]];
   }
 
-  
+  /**
+   * Bubble up (sift up) — restore heap property after insertion
+   */
   private bubbleUp(index: number): void {
     while (index > 0) {
       const parentIndex = this.getParentIndex(index);
@@ -48,7 +64,9 @@ export class MaxHeap<T extends Prioritizable> {
     }
   }
 
-  
+  /**
+   * Bubble down (sift down) — restore heap property after extraction
+   */
   private bubbleDown(index: number): void {
     while (true) {
       let largestIndex = index;
@@ -78,18 +96,24 @@ export class MaxHeap<T extends Prioritizable> {
     }
   }
 
-  
+  /**
+   * Insert an item — O(log n)
+   */
   insert(item: T): void {
     this.items.push(item);
     this.bubbleUp(this.items.length - 1);
   }
 
-  
+  /**
+   * Peek at the top item (highest priority) — O(1)
+   */
   peek(): T | undefined {
     return this.items[0];
   }
 
-  
+  /**
+   * Extract and remove the top item — O(log n)
+   */
   extract(): T | undefined {
     if (this.items.length === 0) return undefined;
     if (this.items.length === 1) return this.items.pop();
@@ -100,7 +124,9 @@ export class MaxHeap<T extends Prioritizable> {
     return root;
   }
 
-  
+  /**
+   * Get all items sorted by priority (descending)
+   */
   toArray(): T[] {
     const sorted: T[] = [];
     const tempHeap = new MaxHeap([...this.items]);
@@ -111,23 +137,31 @@ export class MaxHeap<T extends Prioritizable> {
     return sorted;
   }
 
-  
+  /**
+   * Get size of the heap
+   */
   size(): number {
     return this.items.length;
   }
 
-  
+  /**
+   * Check if heap is empty
+   */
   isEmpty(): boolean {
     return this.items.length === 0;
   }
 
-  
+  /**
+   * Clear the heap
+   */
   clear(): void {
     this.items = [];
   }
 }
 
-
+/**
+ * Min Heap for comparison (useful for bottom-k problems)
+ */
 export class MinHeap<T extends Prioritizable> {
   private items: T[];
 

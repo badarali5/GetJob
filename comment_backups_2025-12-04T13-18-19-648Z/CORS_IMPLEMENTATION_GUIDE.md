@@ -221,7 +221,7 @@ private String allowedOrigins;
 
 ```properties
 # application.properties
-cors.allowed.origins=${CORS_ALLOWED_ORIGINS:http:
+cors.allowed.origins=${CORS_ALLOWED_ORIGINS:http://localhost:5173,...}
 ```
 
 ---

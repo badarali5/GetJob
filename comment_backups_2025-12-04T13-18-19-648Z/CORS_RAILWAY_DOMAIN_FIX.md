@@ -61,10 +61,10 @@ configuration.setAllowedOrigins(Arrays.asList(
 ### 2. application.properties
 ```properties
 # BEFORE:
-cors.allowed.origins=${CORS_ALLOWED_ORIGINS:...,https:
+cors.allowed.origins=${CORS_ALLOWED_ORIGINS:...,https://*.vercel.app}
 
 # AFTER:
-cors.allowed.origins=${CORS_ALLOWED_ORIGINS:...,https:
+cors.allowed.origins=${CORS_ALLOWED_ORIGINS:...,https://*.vercel.app,https://getjob-production.up.railway.app,https://*.railway.app}
 ```
 
 ---
@@ -73,12 +73,12 @@ cors.allowed.origins=${CORS_ALLOWED_ORIGINS:...,https:
 
 ### Allowed Origins
 ```
-✅ http:
-✅ http:
-✅ https:
-✅ https:
-✅ https:
-✅ https:
+✅ http://localhost:5173         (Local dev - Vite)
+✅ http://localhost:3000         (Local dev - alternative)
+✅ https://getjobportal.vercel.app (Production frontend)
+✅ https://*.vercel.app          (Vercel preview deployments)
+✅ https://getjob-production.up.railway.app (Production backend)
+✅ https://*.railway.app         (Other Railway instances)
 ```
 
 ### Allowed Methods
@@ -111,11 +111,11 @@ cors.allowed.origins=${CORS_ALLOWED_ORIGINS:...,https:
 ```
 Frontend (Vercel)
     ↓
-https:
+https://getjobportal.vercel.app
     ↓
 Makes request to backend
     ↓
-https:
+https://getjob-production.up.railway.app/jobs
     ↓
 Browser checks CORS
     ↓
@@ -126,7 +126,7 @@ Request allowed to proceed
 Backend receives request
     ↓
 Backend sends response with:
-    Access-Control-Allow-Origin: https:
+    Access-Control-Allow-Origin: https://getjobportal.vercel.app
     ↓
 ✅ Frontend receives data successfully
 ```
@@ -141,18 +141,18 @@ Backend sends response with:
 mvn spring-boot:run
 
 # Frontend calls:
-http:
+http://localhost:8081/jobs
 
 # Works ✅ (localhost in allowed list)
 ```
 
 ### Test 2: Production (Vercel → Railway)
 ```bash
-# Frontend: https:
-# Backend: https:
+# Frontend: https://getjobportal.vercel.app
+# Backend: https://getjob-production.up.railway.app
 
 # Browser makes request
-fetch('https:
+fetch('https://getjob-production.up.railway.app/jobs', {
   credentials: 'include'
 })
 
@@ -161,13 +161,13 @@ fetch('https:
 
 ### Test 3: Verify CORS Headers
 ```bash
-curl -X OPTIONS https:
-  -H "Origin: https:
+curl -X OPTIONS https://getjob-production.up.railway.app/jobs \
+  -H "Origin: https://getjobportal.vercel.app" \
   -H "Access-Control-Request-Method: POST" \
   -v
 
 # Should include in response:
-# Access-Control-Allow-Origin: https:
+# Access-Control-Allow-Origin: https://getjobportal.vercel.app
 # Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH
 ```
 
@@ -192,16 +192,16 @@ git push
 In Railway logs, you should see:
 ```
 CORS allowed origins loaded:
-- http:
-- http:
-- https:
-- https:
-- https:
-- https:
+- http://localhost:5173
+- http://localhost:3000
+- https://getjobportal.vercel.app
+- https://*.vercel.app
+- https://getjob-production.up.railway.app
+- https://*.railway.app
 ```
 
 ### Step 4: Test from Frontend
-Go to https:
+Go to https://getjobportal.vercel.app and verify:
 - No CORS errors in browser console
 - API calls succeed
 - Data loads properly
@@ -213,7 +213,7 @@ Go to https:
 You can override all origins via Railway environment variable:
 
 ```
-CORS_ALLOWED_ORIGINS=https:
+CORS_ALLOWED_ORIGINS=https://getjobportal.vercel.app,https://getjob-production.up.railway.app
 ```
 
 (Useful if you add more domains later)
@@ -248,8 +248,8 @@ CORS_ALLOWED_ORIGINS=https:
 
 ## What Happens If This Isn't Fixed
 
-1. User visits `https:
-2. Frontend tries to call `https:
+1. User visits `https://getjobportal.vercel.app`
+2. Frontend tries to call `https://getjob-production.up.railway.app/jobs`
 3. Browser pre-flight check fails (Railway domain not allowed)
 4. Browser returns CORS error WITHOUT reaching backend
 5. User sees "Connection failed" or no data
@@ -259,8 +259,8 @@ CORS_ALLOWED_ORIGINS=https:
 
 ## What Happens With This Fix
 
-1. User visits `https:
-2. Frontend tries to call `https:
+1. User visits `https://getjobportal.vercel.app`
+2. Frontend tries to call `https://getjob-production.up.railway.app/jobs`
 3. Browser pre-flight check passes (Railway domain IS allowed)
 4. Request reaches backend
 5. Backend processes request

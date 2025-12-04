@@ -21,7 +21,7 @@ export default class AVLTree<T> {
     return this.map.get(key.trim()) || [];
   }
 
-  
+  // return skill keys that start with prefix (case-insensitive), useful for autocomplete
   searchByPrefix(prefix: string): string[] {
     if (!prefix) return [];
     const p = prefix.toLowerCase();

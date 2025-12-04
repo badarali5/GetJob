@@ -1,4 +1,7 @@
-
+/**
+ * AVL Tree Node for skill-based job search
+ * Each node represents a skill, with jobs listed under that node
+ */
 export interface JobData {
   id: string;
   title: string;
@@ -23,7 +26,10 @@ export class AVLNode<T> {
   }
 }
 
-
+/**
+ * AVL Tree for skill-based job indexing
+ * Maintains balanced tree structure for efficient O(log n) searches
+ */
 export class AVLTree<T extends { id: string }> {
   root: AVLNode<T> | null;
 
@@ -31,22 +37,30 @@ export class AVLTree<T extends { id: string }> {
     this.root = null;
   }
 
-  
+  /**
+   * Get the height of a node
+   */
   private getHeight(node: AVLNode<T> | null): number {
     return node ? node.height : 0;
   }
 
-  
+  /**
+   * Get the balance factor of a node
+   */
   private getBalance(node: AVLNode<T> | null): number {
     return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
   }
 
-  
+  /**
+   * Update node height based on children
+   */
   private updateHeight(node: AVLNode<T>): void {
     node.height = Math.max(this.getHeight(node.left), this.getHeight(node.right)) + 1;
   }
 
-  
+  /**
+   * Right rotation
+   */
   private rotateRight(y: AVLNode<T>): AVLNode<T> {
     const x = y.left!;
     const T2 = x.right;
@@ -60,7 +74,9 @@ export class AVLTree<T extends { id: string }> {
     return x;
   }
 
-  
+  /**
+   * Left rotation
+   */
   private rotateLeft(x: AVLNode<T>): AVLNode<T> {
     const y = x.right!;
     const T2 = y.left;
@@ -74,7 +90,9 @@ export class AVLTree<T extends { id: string }> {
     return y;
   }
 
-  
+  /**
+   * Insert a skill with associated job
+   */
   insert(skill: string, job: T): void {
     this.root = this._insert(this.root, skill, job);
   }
@@ -92,7 +110,7 @@ export class AVLTree<T extends { id: string }> {
     } else if (skillLower > nodeLower) {
       node.right = this._insert(node.right, skill, job);
     } else {
-      
+      // Skill already exists, add job to existing node
       if (!node.jobs.find(j => j.id === job.id)) {
         node.jobs.push(job);
       }
@@ -102,23 +120,23 @@ export class AVLTree<T extends { id: string }> {
     this.updateHeight(node);
     const balance = this.getBalance(node);
 
-    
+    // Left-Left case
     if (balance > 1 && skillLower < node.left!.skill.toLowerCase()) {
       return this.rotateRight(node);
     }
 
-    
+    // Right-Right case
     if (balance < -1 && skillLower > node.right!.skill.toLowerCase()) {
       return this.rotateLeft(node);
     }
 
-    
+    // Left-Right case
     if (balance > 1 && skillLower > node.left!.skill.toLowerCase()) {
       node.left = this.rotateLeft(node.left!);
       return this.rotateRight(node);
     }
 
-    
+    // Right-Left case
     if (balance < -1 && skillLower < node.right!.skill.toLowerCase()) {
       node.right = this.rotateRight(node.right!);
       return this.rotateLeft(node);
@@ -127,7 +145,9 @@ export class AVLTree<T extends { id: string }> {
     return node;
   }
 
-  
+  /**
+   * Search for jobs by skill
+   */
   search(skill: string): T[] {
     const node = this._search(this.root, skill);
     return node ? node.jobs : [];
@@ -150,7 +170,9 @@ export class AVLTree<T extends { id: string }> {
     }
   }
 
-  
+  /**
+   * Get all skills in alphabetical order (in-order traversal)
+   */
   getAllSkills(): string[] {
     const skills: string[] = [];
     this._inOrder(this.root, skills);
@@ -164,7 +186,9 @@ export class AVLTree<T extends { id: string }> {
     this._inOrder(node.right, skills);
   }
 
-  
+  /**
+   * Get all jobs across all skills
+   */
   getAllJobs(): T[] {
     const jobs: T[] = [];
     this._collectAllJobs(this.root, jobs);
@@ -178,7 +202,9 @@ export class AVLTree<T extends { id: string }> {
     this._collectAllJobs(node.right, jobs);
   }
 
-  
+  /**
+   * Find skills that start with a prefix (for autocomplete)
+   */
   searchByPrefix(prefix: string): string[] {
     const results: string[] = [];
     const lowerPrefix = prefix.toLowerCase();
@@ -195,7 +221,9 @@ export class AVLTree<T extends { id: string }> {
     this._prefixSearch(node.right, prefix, results);
   }
 
-  
+  /**
+   * Clear the tree
+   */
   clear(): void {
     this.root = null;
   }

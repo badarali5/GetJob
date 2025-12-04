@@ -3,7 +3,7 @@
 ## Quick Setup (5 minutes)
 
 ### Step 1: Go to Railway Dashboard
-1. Navigate to https:
+1. Navigate to https://railway.app
 2. Select your GetJob application
 3. Click on "Settings"
 

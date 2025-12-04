@@ -2,7 +2,7 @@
 
 **Date:** November 27, 2025  
 **Status:** ✅ READY FOR TESTING  
-**Frontend:** Running on http:
+**Frontend:** Running on http://localhost:8080/jobs  
 **Test Data:** 10 Mock Jobs Loaded  
 
 ---

@@ -2,7 +2,10 @@ package com.example.GetJob.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-
+/**
+ * Test controller for debugging CORS configuration
+ * Can be removed in production
+ */
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
