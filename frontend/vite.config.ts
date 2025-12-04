@@ -17,11 +17,22 @@ export default defineConfig(({ mode }) => ({
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     },
+    // HMR configuration for development only
+    hmr: mode === 'development' ? {
+      host: 'localhost',
+      port: 8080,
+      protocol: 'ws'
+    } : false,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    // Ensure production build doesn't include HMR code
+    minify: 'terser',
+    sourcemap: false,
   },
 }));
