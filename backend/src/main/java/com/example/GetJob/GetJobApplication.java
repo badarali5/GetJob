@@ -10,7 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class GetJobApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GetJobApplication.class, args);
+		{
+			SpringApplication.run(GetJobApplication.class, args);
+		}
 	}
-
 }
