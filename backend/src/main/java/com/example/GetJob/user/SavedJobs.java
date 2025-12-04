@@ -1,23 +1,46 @@
 package com.example.GetJob.user;
 
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "saved_jobs")
 public class SavedJobs {
-    private String jobName;
-    private String jobDescription;
-    public SavedJobs(String jobName, String jobDescription) {
-        this.jobName = jobName;
-        this.jobDescription = jobDescription;
-    }
-    public String getJobName() {
-        return jobName;
-    }
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
-    }
-    public String getJobDescription() {
-        return jobDescription;
-    }
-    public void setJobDescription(String jobDescription) {
-        this.jobDescription = jobDescription;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "job_id", nullable = false)
+    private Job job;
+
+    @Column(nullable = false)
+    private LocalDateTime savedAt;
+
+    // Constructors
+    public SavedJobs() {}
+
+    public SavedJobs(User user, Job job) {
+        this.user = user;
+        this.job = job;
+        this.savedAt = LocalDateTime.now();
     }
 
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public Job getJob() { return job; }
+    public void setJob(Job job) { this.job = job; }
+
+    public LocalDateTime getSavedAt() { return savedAt; }
+    public void setSavedAt(LocalDateTime savedAt) { this.savedAt = savedAt; }
 }
