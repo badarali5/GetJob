@@ -13,10 +13,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
-     * Security filter chain configuration for REST API with JWT authentication
-     * Uses the CORS configuration from CorsConfig bean
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, 
@@ -24,31 +20,22 @@ public class SecurityConfig {
     ) throws Exception {
         
         http
-            // Enable CORS with the injected configuration source
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             
-            // Disable CSRF for stateless REST API
             .csrf(csrf -> csrf.disable())
             
-            // Configure authorization
             .authorizeHttpRequests(auth -> auth
-                // Allow preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                // Allow auth endpoints without authentication
                 .requestMatchers("/api/auth/**").permitAll()
                 
-                // Allow job endpoints for browsing
                 .requestMatchers("/jobs/**").permitAll()
                 
-                // Allow Swagger/OpenAPI documentation if available
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 
-                // All other requests require authentication
                 .anyRequest().authenticated()
             )
             
-            // Set session management to stateless
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             );

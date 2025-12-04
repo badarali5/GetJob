@@ -7,7 +7,6 @@ const Navbar = () => {
     <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-800">
       <div className="container mx-auto px-0 h-20 flex items-center justify-between">
         
-        {/* LEFT — LOGO */}
         <div className="flex items-center">
           <Link 
             to="/" 
@@ -20,7 +19,6 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* CENTER LINKS */}
         <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
           <Link 
             to="/jobs" 
@@ -42,7 +40,6 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* RIGHT — BUTTONS */}
         <div className="flex items-center gap-4">
           <Link to="/signin">
             <Button variant="ghost" size="lg">

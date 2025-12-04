@@ -1,13 +1,10 @@
-// Vite exposes env variables via import.meta.env and requires the VITE_ prefix.
-// Fallback to an empty string so relative paths work during dev (Vite proxy).
+
 const env = import.meta.env as { VITE_API_URL?: string, MODE?: string };
 let API_BASE = (env.VITE_API_URL || '').replace(/\/$/, '');
 
 
 
-// If VITE_API_URL is not provided, provide sensible fallbacks depending on where
-// the frontend is running. This lets the deployed frontend (Vercel) call the
-// Railway backend without requiring an environment variable to be set.
+
 if (!API_BASE && typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') {
@@ -28,7 +25,7 @@ async function request(path: string, opts: RequestInit = {}) {
         'Content-Type': 'application/json',
     };
 
-    // Merge any provided headers (Headers | [string, string][] | Record<string,string>)
+
     const optsHeaders = opts.headers;
     if (optsHeaders) {
         if (optsHeaders instanceof Headers) {
