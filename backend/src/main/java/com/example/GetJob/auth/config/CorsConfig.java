@@ -68,9 +68,12 @@ public class CorsConfig {
         
         // Set max age for preflight requests (1 hour)
         configuration.setMaxAge(3600L);
-
+        
+        // Register the configuration
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+        
         return source;
     }
 }
+
