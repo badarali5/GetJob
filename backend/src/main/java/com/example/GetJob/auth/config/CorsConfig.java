@@ -1,4 +1,4 @@
-package com.example.GetJob.config;
+package com.example.GetJob.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
