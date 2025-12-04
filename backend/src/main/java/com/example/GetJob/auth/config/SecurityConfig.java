@@ -13,10 +13,14 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /**
+     * Security filter chain configuration for REST API with JWT authentication
+     * Uses the CORS configuration from CorsConfig bean
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
-            // Enable CORS with configuration from CorsConfig (injected CorsConfigurationSource bean)
+            // Enable CORS with single configuration source from CorsConfig bean
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             // CSRF protection is disabled for stateless REST API with JWT authentication
             // where each request is authenticated via the token, not session cookies
