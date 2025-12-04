@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-// API calls are disabled for JobsFixed; using hardcoded dataset instead
 import { AVLTree } from "@/lib/avlTree";
 
 // shape returned by backend /jobs
@@ -381,13 +380,6 @@ const JobsFixed = () => {
     setLoading(true);
     setError(null);
     try {
-      // ========== COMMENTED OUT API CALL ==========
-      // Fetch jobs from backend API
-      // const data = await getJson<BackendJob[]>('/jobs');
-      // const results = data || [];
-      // ============================================
-
-      // ========== HARDCODED 100 JOBS ==========
       const results: BackendJob[] = [
         { id: "1", title: "Senior React Developer", companyName: "TechCorp", location: "Karachi, Pakistan", jobType: "Full-time", postedAt: "2024-12-01", description: "Build modern web apps with React, TypeScript, and Node.js", salaryRange: "$120k - $160k", skills: ["React", "TypeScript", "Node.js"] },
         { id: "2", title: "Full Stack Engineer", companyName: "StartupXYZ", location: "Lahore, Pakistan", jobType: "Full-time", postedAt: "2024-11-30", description: "Work on cutting-edge products with Python, Django, and PostgreSQL", salaryRange: "$100k - $140k", skills: ["Python", "Django", "PostgreSQL"] },

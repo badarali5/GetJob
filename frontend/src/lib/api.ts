@@ -76,7 +76,6 @@ export function signin(data: { email: string; password: string }) {
     return postJson('/api/auth/signin', data);
 }
 
-// Token helpers
 export function setToken(token: string) {
     localStorage.setItem('token', token);
 }
@@ -87,7 +86,6 @@ export function clearToken() {
     localStorage.removeItem('token');
 }
 
-// User helpers
 export function getUser() {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;

@@ -1,10 +1,4 @@
-// Lightweight BST-backed stand-in for an AVL tree used only for skill indexing.
-// Provides the minimal API expected by the app:
-// - new AVLTree<T>()
-// - insert(key: string, value: T): void
-// - search(key: string): T[]
-// - searchByPrefix(prefix: string): string[]
-// - getAllSkills(): string[]
+
 
 export default class AVLTree<T> {
   private map: Map<string, T[]>;
