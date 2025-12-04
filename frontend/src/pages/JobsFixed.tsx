@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getJson } from "@/lib/api";
+// API calls are disabled for JobsFixed; using hardcoded dataset instead
 import { AVLTree } from "@/lib/avlTree";
 
 // shape returned by backend /jobs
