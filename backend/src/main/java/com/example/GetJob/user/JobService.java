@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Value;
 public class JobService {
 
     private final JobRepository jobRepository;
+    private final ApplicationRepository applicationRepository;
+    private final SavedJobsRepository savedJobsRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public JobService(JobRepository jobRepository) {
@@ -244,4 +247,6 @@ public class JobService {
     }
 
 }
+
+
 
