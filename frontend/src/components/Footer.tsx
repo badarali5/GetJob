@@ -32,36 +32,6 @@ const Footer = () => {
                   </TooltipContent>
                 </Tooltip>
               </li>
-              <li>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/" className="hover:text-foreground transition-colors">Career Advice</Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Get expert tips on career growth, workplace communication, and developing a strong professional presence to help you move confidently toward your goals.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
-              <li>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/" className="hover:text-foreground transition-colors">Resume Tips</Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Learn how to create a polished and effective resume that highlights your strengths. Includes formatting guidance, keyword optimization, and examples.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
-              <li>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/" className="hover:text-foreground transition-colors">Interview Prep</Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Prepare for your next interview with common questions, best-practice answers, and confidence-building strategies to help you stand out from other candidates.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
             </ul>
           </div>
 
@@ -75,36 +45,6 @@ const Footer = () => {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Easily post job openings and reach qualified candidates. Our platform helps employers connect with the right talent faster.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
-              <li>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/" className="hover:text-foreground transition-colors">Pricing</Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Choose from flexible pricing plans designed for both startups and established companies. Pay only for the features your hiring team needs.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
-              <li>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/" className="hover:text-foreground transition-colors">Resources</Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Access hiring guides, templates, and best practices to streamline your recruitment process and make better decisions.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
-              <li>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link to="/" className="hover:text-foreground transition-colors">Contact Sales</Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Need assistance with bulk hiring or custom solutions? Connect with our sales team for tailored support and enterprise-level services.</p>
                   </TooltipContent>
                 </Tooltip>
               </li>
@@ -131,16 +71,6 @@ const Footer = () => {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Stay updated with articles on industry trends, job market insights, career growth tips, and updates about our platform.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </li>
-              <li>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Link to="/" className="hover:text-foreground transition-colors">Contact</Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Have questions or suggestions? Reach out to us — we value feedback and are committed to improving our platform.</p>
                   </TooltipContent>
                 </Tooltip>
               </li>
