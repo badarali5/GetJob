@@ -58,6 +58,17 @@ function extractSkillsFromJob(job: BackendJob): string[] {
   return commonSkills.filter(skill => text.includes(skill.toLowerCase()));
 }
 
+/**
+ * Parse minimum salary from salaryRange string
+ */
+function parseMinSalary(salaryRange?: string): number {
+  if (!salaryRange) return 0;
+  const numbers = salaryRange.match(/\d+/g);
+  if (!numbers) return 0;
+  // Take the first number as min salary
+  return parseInt(numbers[0]) || 0;
+}
+
 const Jobs = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [jobs, setJobs] = useState<BackendJob[]>([]);
@@ -68,7 +79,8 @@ const Jobs = () => {
   const [loc, setLoc] = useState('');
   const [workplace, setWorkplace] = useState('');
   const [jobTypeFilter, setJobTypeFilter] = useState('');
-  const [salaryFilter, setSalaryFilter] = useState('');
+  const [minSalaryFilter, setMinSalaryFilter] = useState('');
+  const [sortBy, setSortBy] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [skillAutocomplete, setSkillAutocomplete] = useState<string[]>([]);
   const [skillSearchInput, setSkillSearchInput] = useState('');
@@ -136,8 +148,11 @@ const Jobs = () => {
       results = results.filter(j => (j.jobType || '').toLowerCase().includes(jobType.toLowerCase()));
     }
 
-    if (salaryFilter && salaryFilter.trim() !== '') {
-      results = results.filter(j => (j.salaryRange || '').toLowerCase().includes(salaryFilter.toLowerCase()));
+    if (minSalaryFilter && minSalaryFilter.trim() !== '') {
+      const minSalary = parseInt(minSalaryFilter);
+      if (!isNaN(minSalary)) {
+        results = results.filter(j => parseMinSalary(j.salaryRange) >= minSalary);
+      }
     }
 
     // Filter by selected skills using AVL Tree
@@ -148,6 +163,19 @@ const Jobs = () => {
         jobsWithSkill.forEach(job => jobsBySkill.add(job));
       });
       results = results.filter(job => jobsBySkill.has(job));
+    }
+
+    // Apply sorting
+    if (sortBy === 'salary-high') {
+      results = results.sort((a, b) => parseMinSalary(b.salaryRange) - parseMinSalary(a.salaryRange));
+    } else if (sortBy === 'salary-low') {
+      results = results.sort((a, b) => parseMinSalary(a.salaryRange) - parseMinSalary(b.salaryRange));
+    } else if (sortBy === 'recent') {
+      results = results.sort((a, b) => {
+        const dateA = new Date(a.postedAt || a.createdAt || 0).getTime();
+        const dateB = new Date(b.postedAt || b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
     }
 
     setFilteredJobs(results);
@@ -322,6 +350,38 @@ const Jobs = () => {
                         <SelectItem value="full-time">Full-time</SelectItem>
                         <SelectItem value="part-time">Part-time</SelectItem>
                         <SelectItem value="contract">Contract</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Minimum Salary ($)</label>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 50000"
+                      className="bg-background"
+                      value={minSalaryFilter}
+                      onChange={(e) => {
+                        setMinSalaryFilter(e.target.value);
+                        applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Sort By</label>
+                    <Select value={sortBy} onValueChange={(value) => {
+                      setSortBy(value);
+                      applyFilters(jobs, searchTerm, loc, workplace, jobTypeFilter, selectedSkills);
+                    }}>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue placeholder="Default" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        <SelectItem value="">Default</SelectItem>
+                        <SelectItem value="salary-high">Highest Salary</SelectItem>
+                        <SelectItem value="salary-low">Lowest Salary</SelectItem>
+                        <SelectItem value="recent">Most Recent</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

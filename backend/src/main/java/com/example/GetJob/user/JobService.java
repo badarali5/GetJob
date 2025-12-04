@@ -19,14 +19,14 @@ public class JobService {
     private final JobRepository jobRepository;
     private final ApplicationRepository applicationRepository;
     private final SavedJobsRepository savedJobsRepository;
-    private final UserRepository userRepository;
+    private final com.example.GetJob.auth.repository.AuthUserRepository authUserRepository;
 
     @Autowired
-    public JobService(JobRepository jobRepository, ApplicationRepository applicationRepository, SavedJobsRepository savedJobsRepository, UserRepository userRepository) {
+    public JobService(JobRepository jobRepository, ApplicationRepository applicationRepository, SavedJobsRepository savedJobsRepository, com.example.GetJob.auth.repository.AuthUserRepository authUserRepository) {
         this.jobRepository = jobRepository;
         this.applicationRepository = applicationRepository;
         this.savedJobsRepository = savedJobsRepository;
-        this.userRepository = userRepository;
+        this.authUserRepository = authUserRepository;
     }
 
     @Value("${jsearch.api.key}")
@@ -250,8 +250,20 @@ public class JobService {
     }
 
     public Application applyForJob(Long userId, String jobId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Convert jobId from String to Long if needed
+        Long jobIdLong;
+        try {
+            jobIdLong = Long.parseLong(jobId);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid job ID format");
+        }
+        
+        Job job = jobRepository.findById(jobIdLong)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+        
         Application application = new Application();
         application.setUser(user);
         application.setJob(job);
@@ -260,8 +272,20 @@ public class JobService {
     }
 
     public SavedJobs saveJobForLater(Long userId, String jobId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Convert jobId from String to Long if needed
+        Long jobIdLong;
+        try {
+            jobIdLong = Long.parseLong(jobId);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid job ID format");
+        }
+        
+        Job job = jobRepository.findById(jobIdLong)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+        
         SavedJobs savedJob = new SavedJobs();
         savedJob.setUser(user);
         savedJob.setJob(job);
