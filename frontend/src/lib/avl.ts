@@ -20,7 +20,6 @@ export default class AVLTree<T> {
     if (!key) return [];
     return this.map.get(key.trim()) || [];
   }
-
   
   searchByPrefix(prefix: string): string[] {
     if (!prefix) return [];

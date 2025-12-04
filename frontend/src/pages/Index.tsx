@@ -50,38 +50,6 @@ const Index = () => {
       <Hero />
       <QuickFilters />
       
-      {/* Top Jobs by Salary */}
-      {!loading && jobs.length > 0 && (
-        <JobHeapSection
-          jobs={jobs}
-          title="💰 Top Paying Jobs"
-          icon={<Zap className="h-6 w-6 text-yellow-500" />}
-          metric="salary"
-          limit={5}
-        />
-      )}
-
-      {/* Trending Jobs by Views */}
-      {!loading && jobs.length > 0 && (
-        <JobHeapSection
-          jobs={jobs}
-          title="🔥 Trending Now"
-          icon={<TrendingUp className="h-6 w-6 text-red-500" />}
-          metric="views"
-          limit={5}
-        />
-      )}
-
-      {/* Most Popular Jobs */}
-      {!loading && jobs.length > 0 && (
-        <JobHeapSection
-          jobs={jobs}
-          title="⭐ Most Popular"
-          icon={<Eye className="h-6 w-6 text-blue-500" />}
-          metric="popularity"
-          limit={5}
-        />
-      )}
 
       <HowItWorks />
       <Footer />
