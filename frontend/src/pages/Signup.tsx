@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,6 +46,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -86,6 +88,48 @@ const Signup = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setIsGoogleLoading(true);
+    try {
+      const result = await postJson("/api/auth/google", {
+        token: credentialResponse.credential,
+      }) as {
+        token?: string;
+        [key: string]: unknown;
+      };
+
+      if (!result || !result.token) {
+        throw new Error("Google signup failed");
+      }
+
+      setToken(result.token);
+      localStorage.setItem("user", JSON.stringify(result));
+
+      toast({
+        title: "Success!",
+        description: "Signed up with Google successfully.",
+      });
+
+      navigate("/jobs");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign up with Google",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast({
+      title: "Error",
+      description: "Failed to sign up with Google",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -182,6 +226,26 @@ const Signup = () => {
               </Button>
             </form>
           </Form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                text="signup_with"
+              />
+            </div>
+          </div>
+
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
             <Link to="/signin" className="text-primary hover:underline">
