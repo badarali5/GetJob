@@ -139,7 +139,7 @@ The frontend is now running with **mock data** (10 test jobs) since the backend 
 ```javascript
 [
   { id: '1', title: 'React Developer', companyName: 'Tech Corp', location: 'Remote', jobType: 'full-time', salaryRange: '80k - 120k', description: '...', skills: ['React', 'TypeScript', 'AWS'] },
-  { id: '2', title: 'Python Backend Engineer', companyName: 'DataFlow Inc', location: 'San Francisco, CA', jobType: 'full-time', salaryRange: '90k - 140k', description: '...', skills: ['Python', 'Django', 'PostgreSQL'] },
+  { id: '2', title: 'Python Backend Engineer', companyName: 'DataFlow Inc', location: 'Lahore, Pakistan', jobType: 'full-time', salaryRange: '90k - 140k', description: '...', skills: ['Python', 'Django', 'PostgreSQL'] },
   // ... 8 more jobs
 ]
 ```

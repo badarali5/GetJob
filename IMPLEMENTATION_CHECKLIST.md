@@ -204,15 +204,15 @@ const [skillTree, setSkillTree] = useState<AVLTree<BackendJob> | null>(null);
 | ID | Title | Company | Type | Salary | Location | Skills |
 |----|-------|---------|------|--------|----------|--------|
 | 1 | React Developer | Tech Corp | Full-time | 80k-120k | Remote | React, TypeScript, AWS |
-| 2 | Python Backend Engineer | DataFlow Inc | Full-time | 90k-140k | San Francisco | Python, Django, PostgreSQL |
-| 3 | Full Stack JS Developer | WebStudio | Full-time | 75k-110k | New York | JS, Next.js, Node, MongoDB |
+| 2 | Python Backend Engineer | DataFlow Inc | Full-time | 90k-140k | Lahore | Python, Django, PostgreSQL |
+| 3 | Full Stack JS Developer | WebStudio | Full-time | 75k-110k | Karachi | JS, Next.js, Node, MongoDB |
 | 4 | DevOps Engineer | CloudTech | Full-time | 100k-160k | Remote | Docker, Kubernetes, AWS, CI/CD |
-| 5 | ML Engineer | AI Solutions | Full-time | 110k-170k | Boston | Python, ML, TensorFlow, AWS |
+| 5 | ML Engineer | AI Solutions | Full-time | 110k-170k | Multan | Python, ML, TensorFlow, AWS |
 | 6 | Frontend Intern | StartupXYZ | Internship | 20k-30k | Remote | React, HTML, CSS, JavaScript |
-| 7 | Java Spring Boot Dev | EnterpriseCorp | Full-time | 85k-125k | Chicago | Java, Spring Boot, Docker, Kubernetes |
+| 7 | Java Spring Boot Dev | EnterpriseCorp | Full-time | 85k-125k | Faisalabad | Java, Spring Boot, Docker, Kubernetes |
 | 8 | GraphQL API Developer | GraphQL Inc | Part-time | 60k-90k | Remote | JavaScript, GraphQL, Node, PostgreSQL |
-| 9 | DevOps Contract | TemporaryJobs Inc | Contract | 50k-80k | Austin | AWS, CI/CD, Docker |
-| 10 | Data Scientist | DataCorp | Full-time | 120k-180k | Seattle | Python, SQL, Data Science, ML |
+| 9 | DevOps Contract | TemporaryJobs Inc | Contract | 50k-80k | Peshawar | AWS, CI/CD, Docker |
+| 10 | Data Scientist | DataCorp | Full-time | 120k-180k | Islamabad | Python, SQL, Data Science, ML |
 
 ---
 

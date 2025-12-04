@@ -212,15 +212,15 @@ Jobs Array: 10 mock jobs loaded ✓
 | Job ID | Title | Type | Salary | Location |
 |--------|-------|------|--------|----------|
 | 1 | React Developer | Full-time | $80k-$120k | Remote |
-| 2 | Python Backend Engineer | Full-time | $90k-$140k | San Francisco |
-| 3 | Full Stack JS Developer | Full-time | $75k-$110k | New York |
+| 2 | Python Backend Engineer | Full-time | $90k-$140k | Lahore |
+| 3 | Full Stack JS Developer | Full-time | $75k-$110k | Karachi |
 | 4 | DevOps Engineer | Full-time | $100k-$160k | Remote |
-| 5 | ML Engineer | Full-time | $110k-$170k | Boston |
+| 5 | ML Engineer | Full-time | $110k-$170k | Multan |
 | 6 | Frontend Intern | **Internship** | $20k-$30k | Remote |
-| 7 | Java Spring Boot Dev | Full-time | $85k-$125k | Chicago |
+| 7 | Java Spring Boot Dev | Full-time | $85k-$125k | Faisalabad |
 | 8 | GraphQL API Developer | **Part-time** | $60k-$90k | Remote |
-| 9 | DevOps Contract | **Contract** | $50k-$80k | Austin |
-| 10 | Data Scientist | Full-time | $120k-$180k | Seattle |
+| 9 | DevOps Contract | **Contract** | $50k-$80k | Peshawar |
+| 10 | Data Scientist | Full-time | $120k-$180k | Islamabad |
 
 ---
 

@@ -14,7 +14,7 @@ const jobDetails = {
   id: "1",
   title: "Frontend Developer Intern",
   company: "TechCorp",
-  location: "San Francisco, CA",
+  location: "Lahore, Pakistan",
   type: "Internship",
   postedDate: "2 days ago",
   salary: "$20-25/hour",
