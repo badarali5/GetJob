@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
+
+
 @Service
 public class JobService {
 
@@ -38,7 +40,13 @@ public class JobService {
 
     private final RestTemplate rest = new RestTemplate();
 
+
     public void fetchJobs() {
+
+        // Build URL for scheduled fetch. Use the configured `apiUrl` when present,
+        // but if it's a search endpoint we'll append a default query so scheduled
+        // sync fetches meaningful results. If no `apiUrl` is configured, fall
+        // back to the JSearch default search URL for "software developer".
         String defaultQuery = java.net.URLEncoder.encode("software developer", java.nio.charset.StandardCharsets.UTF_8);
         String url;
         if (apiUrl != null && !apiUrl.isBlank()) {
@@ -47,6 +55,7 @@ public class JobService {
             } else if (apiUrl.toLowerCase().contains("search")) {
                 url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + defaultQuery + "&num_pages=1";
             } else {
+                // non-search endpoint (e.g. internships list) — call as-is
                 url = apiUrl;
             }
         } else {
@@ -60,6 +69,8 @@ public class JobService {
         if (host != null && !host.isBlank()) headers.set("X-RapidAPI-Host", host);
 
         org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+
+        // Null-safety checks to satisfy static analyzers and avoid passing nulls to RestTemplate
         String safeUrl = java.util.Objects.requireNonNull(url, "API URL must not be null");
         org.springframework.http.HttpMethod method = org.springframework.http.HttpMethod.GET;
         org.springframework.http.HttpMethod safeMethod = java.util.Objects.requireNonNull(method, "HttpMethod must not be null");
@@ -85,23 +96,32 @@ public class JobService {
                     job.setDescription(j.path("job_description").asText(null));
                     job.setSalaryRange(j.path("job_salary_currency").asText("") + " " + j.path("job_salary").asText(""));
                     job.setSource("jsearch");
+
+                    // try to parse posted_at if present
                     if (j.hasNonNull("job_posted_at")) {
                         try {
                             String posted = j.path("job_posted_at").asText(null);
                             if (posted != null && !posted.isEmpty()) {
+                                // Many APIs return ISO-8601-like strings; try parsing
                                 java.time.OffsetDateTime odt = java.time.OffsetDateTime.parse(posted);
                                 job.setPostedAt(odt.toLocalDateTime());
                             }
                         } catch (Exception ex) {
+                            // ignore parse errors
                         }
                     }
+
+                    // avoid duplicates (title + company + location)
                     try {
                         Optional<Job> existing = jobRepository.findExisting(title == null ? "" : title, employer == null ? "" : employer, city == null ? "" : city);
                         if (existing.isPresent()) {
                             continue; // skip saving duplicate
                         }
                     } catch (Exception ex) {
+                        // if the query fails for any reason, fall back to saving
                     }
+
+                        // ensure job is non-null for callers and static analysis
                         java.util.Objects.requireNonNull(job, "job must not be null");
                         jobRepository.save(job);
                 }
@@ -111,6 +131,7 @@ public class JobService {
 }
 
     }
+
 
     @Scheduled(fixedRate = 43200000)
     public void syncJobs() {
@@ -127,10 +148,13 @@ public class JobService {
     }
 
     public List<Job> searchJobs(String title) {
+        // First try database search
         List<Job> results = jobRepository.findByTitleContainingIgnoreCase(title);
         if (results != null && !results.isEmpty()) {
             return results;
         }
+
+        // If DB has no results, query JSearch dynamically for the given title
         try {
             return fetchJobsForQuery(title);
         } catch (Exception ex) {
@@ -139,16 +163,24 @@ public class JobService {
         }
     }
 
+    /**
+     * Fetch jobs from JSearch for an arbitrary query and persist them.
+     */
     public List<Job> fetchJobsForQuery(String query) throws Exception {
         if (query == null || query.trim().isEmpty()) return Collections.emptyList();
 
         String encoded = java.net.URLEncoder.encode(query, java.nio.charset.StandardCharsets.UTF_8);
+        // Build URL for query. Support three cases:
+        // 1) `jsearch.api.url` contains the literal token "{query}" -> replace it
+        // 2) `jsearch.api.url` points to a /search endpoint -> append query params
+        // 3) fallback to the JSearch search URL
         String url;
         if (apiUrl != null && !apiUrl.isBlank() && apiUrl.contains("{query}")) {
             url = apiUrl.replace("{query}", encoded);
         } else if (apiUrl != null && !apiUrl.isBlank() && apiUrl.toLowerCase().contains("search")) {
             url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + encoded + "&num_pages=1";
         } else if (apiUrl != null && !apiUrl.isBlank()) {
+            // apiUrl provided but not a search endpoint; try appending query
             url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + encoded;
         } else {
             url = String.format("https://jsearch.p.rapidapi.com/search?query=%s&num_pages=1", encoded);
@@ -177,6 +209,8 @@ public class JobService {
                 String title = j.path("job_title").asText(null);
                 String employer = j.path("employer_name").asText(null);
                 String city = j.path("job_city").asText(null);
+
+                // avoid duplicates
                 try {
                     Optional<Job> existing = jobRepository.findExisting(title == null ? "" : title, employer == null ? "" : employer, city == null ? "" : city);
                     if (existing.isPresent()) {
@@ -184,6 +218,7 @@ public class JobService {
                         continue;
                     }
                 } catch (Exception ex) {
+                    // ignore and continue
                 }
 
                 Job job = new Job();
@@ -202,6 +237,7 @@ public class JobService {
                             job.setPostedAt(odt.toLocalDateTime());
                         }
                     } catch (Exception ex) {
+                        // ignore parse errors
                     }
                 }
 
@@ -236,6 +272,7 @@ public class JobService {
     return applicationRepository.save(application);
 }
 
+
     public SavedJobs saveJobForLater(Long userId, String jobId) {
 
     com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
@@ -250,6 +287,8 @@ public class JobService {
 
     Job job = jobRepository.findById(jobIdLong)
             .orElseThrow(() -> new RuntimeException("Job not found"));
+
+    // Prevent duplicate saves
     if (savedJobsRepository.existsByUser_IdAndJob_Id(userId, jobIdLong)) {
         throw new RuntimeException("Job already saved by user");
     }
@@ -262,5 +301,8 @@ public class JobService {
     return savedJobsRepository.save(saved);
 }
 
+
 }
+
+
 
