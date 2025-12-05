@@ -1,3 +1,13 @@
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_GOOGLE_CLIENT_ID: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 import React, { useState, useEffect } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,10 +30,10 @@ function ScrollToHash() {
   const { hash, pathname } = useLocation();
   React.useEffect(() => {
     if (!hash) return;
-    const id = hash.replace('#', '');
+    const id = hash.replace("#", "");
     const t = setTimeout(() => {
       const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
     return () => clearTimeout(t);
   }, [hash, pathname]);
@@ -50,12 +60,15 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+        <GoogleOAuthProvider
+          clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}
+        >
           <BrowserRouter>
             <ScrollToHash />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/jobs" element={<Jobs />} />
+              <Route path="/jobsfixed" element={<Jobs />} />
               <Route path="/jobs/:id" element={<JobDetail />} />
               <Route path="/employers" element={<Employers />} />
               <Route path="/signup" element={<Signup />} />
