@@ -25,6 +25,7 @@ public class Job {
     private String description;
 
     private String salaryRange;
+    @Column(name = "type", nullable = false)
     private String jobType;
 
     @Column(columnDefinition = "TEXT")
@@ -37,4 +38,12 @@ public class Job {
 
     @Column(name = "company_name")
     private String companyName;
+
+    @PrePersist
+    @PreUpdate
+    private void ensureDefaults() {
+        if (jobType == null || jobType.isBlank()) {
+            jobType = "FULL_TIME";
+        }
+    }
 }

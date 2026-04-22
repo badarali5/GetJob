@@ -6,8 +6,6 @@ if (!API_BASE && typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') {
         API_BASE = 'http://localhost:8081';
-    } else if (host === 'getjobportal.vercel.app') {
-        API_BASE = 'https://getjob-production.up.railway.app';
     }
 }
 

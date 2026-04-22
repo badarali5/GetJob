@@ -7,11 +7,15 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     proxy: {
-      '/jobs': {
-        target: 'https://getjob-production.up.railway.app',
+      '/api': {
+        target: 'http://localhost:8081',
         changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
+        secure: false,
+      },
+      '/jobs': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        secure: false,
       }
     },
     hmr: mode === 'development' ? {
