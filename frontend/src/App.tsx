@@ -8,7 +8,7 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,7 +22,6 @@ import Employers from "./pages/Employers";
 import Signup from "./pages/Signup";
 import Signin from "./pages/Signin";
 import NotFound from "./pages/NotFound";
-import Loading from "./components/Loading";
 
 const queryClient = new QueryClient();
 
@@ -41,20 +40,6 @@ function ScrollToHash() {
 }
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

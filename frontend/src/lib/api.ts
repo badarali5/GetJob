@@ -16,9 +16,7 @@ type FetchError = {
 
 async function request(path: string, opts: RequestInit = {}) {
     const url = API_BASE ? `${API_BASE}${path}` : path;
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-    };
+    const headers: Record<string, string> = {};
 
     const optsHeaders = opts.headers;
     if (optsHeaders) {
@@ -40,7 +38,30 @@ async function request(path: string, opts: RequestInit = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(url, { ...opts, headers, credentials: 'include' });
+    // Set JSON content type only when sending a body to avoid unnecessary preflight requests.
+    const hasBody = opts.body !== undefined && opts.body !== null;
+    if (hasBody && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    const fetchInit: RequestInit = { ...opts, headers, credentials: 'same-origin' };
+
+    let res: Response;
+    try {
+        res = await fetch(url, fetchInit);
+    } catch (primaryError) {
+        // In local dev, retry via frontend proxy when direct backend URL fails.
+        if (API_BASE && path.startsWith('/')) {
+            try {
+                res = await fetch(path, fetchInit);
+            } catch {
+                throw primaryError;
+            }
+        } else {
+            throw primaryError;
+        }
+    }
+
     let body: unknown = null;
     try {
         body = await res.json();

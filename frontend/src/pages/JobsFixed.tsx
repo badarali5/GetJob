@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, MapPin, Briefcase, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AVLTree } from "@/lib/avlTree";
-import { reorderJobsToAvoidAdjacentDuplicates, getPromptForJob } from "@/lib/prompts";
+import { getJson } from "@/lib/api";
 type BackendJob = {
   id: string;
   title?: string;
@@ -342,51 +342,30 @@ const JobsFixed = () => {
   const locationHook = useLocation();
   const navigate = useNavigate();
 
+  const normalizeJobType = (jobType?: string) => {
+    if (!jobType) return "full-time";
+    return jobType.toLowerCase().replace(/_/g, "-");
+  };
+
   const fetchJobs = async () => {
     setLoading(true);
     setError(null);
     try {
-      const results: BackendJob[] = [
-        { id: "1", title: "Senior React Developer", companyName: "TechCorp", location: "Karachi, Pakistan", jobType: "Full-time", postedAt: "2024-12-01", description: "Build modern web apps with React, TypeScript, and Node.js", salaryRange: "$120k - $160k", skills: ["React", "TypeScript", "Node.js"] },
-        { id: "2", title: "Full Stack Engineer", companyName: "StartupXYZ", location: "Lahore, Pakistan", jobType: "Full-time", postedAt: "2024-11-30", description: "Work on cutting-edge products with Python, Django, and PostgreSQL", salaryRange: "$100k - $140k", skills: ["Python", "Django", "PostgreSQL"] },
-        { id: "3", title: "DevOps Engineer", companyName: "CloudSolutions", location: "Islamabad, Pakistan", jobType: "Full-time", postedAt: "2024-11-29", description: "Manage cloud infrastructure with AWS, Docker, Kubernetes", salaryRange: "$130k - $170k", skills: ["AWS", "Docker", "Kubernetes"] },
-        { id: "4", title: "Frontend Developer", companyName: "WebAgency", location: "Rawalpindi, Pakistan", jobType: "Internship", postedAt: "2024-11-28", description: "Create beautiful UIs with Vue.js and Tailwind CSS", salaryRange: "$90k - $120k", skills: ["Vue", "Tailwind", "JavaScript"] },
-        { id: "5", title: "Backend Developer", companyName: "DataCorp", location: "Peshawar, Pakistan", jobType: "Full-time", postedAt: "2024-11-27", description: "Build scalable APIs with Java Spring Boot and microservices", salaryRange: "$110k - $150k", skills: ["Java", "Spring Boot", "Microservices"] },
-        { id: "6", title: "Machine Learning Engineer", companyName: "AI Labs", location: "Quetta, Pakistan", jobType: "Full-time", postedAt: "2024-11-26", description: "Develop ML models with Python, TensorFlow, and PyTorch", salaryRange: "$140k - $180k", skills: ["Python", "Machine Learning", "AI"] },
-        { id: "7", title: "Mobile Developer", companyName: "AppStudio", location: "Multan, Pakistan", jobType: "Full-time", postedAt: "2024-11-25", description: "Build native mobile apps with React Native and Flutter", salaryRange: "$100k - $130k", skills: ["React", "JavaScript", "Mobile"] },
-        { id: "8", title: "Data Scientist", companyName: "Analytics Inc", location: "Faisalabad, Pakistan", jobType: "Full-time", postedAt: "2024-11-24", description: "Analyze big data using Python, SQL, and Data Science tools", salaryRange: "$120k - $160k", skills: ["Python", "SQL", "Data Science"] },
-        { id: "9", title: "QA Engineer", companyName: "QualityFirst", location: "Sialkot, Pakistan", jobType: "Part-time", postedAt: "2024-11-23", description: "Test software with automated testing frameworks and CI/CD", salaryRange: "$80k - $100k", skills: ["Testing", "CI/CD", "JavaScript"] },
-        { id: "10", title: "UI/UX Designer", companyName: "DesignHub", location: "Sukkur, Pakistan", jobType: "Full-time", postedAt: "2024-11-22", description: "Design user interfaces with Figma and modern design tools", salaryRange: "$90k - $120k", skills: ["HTML", "CSS", "Design"] },
-        { id: "11", title: "Cloud Architect", companyName: "MegaCorp", location: "Karachi, Pakistan", jobType: "Full-time", postedAt: "2024-11-21", description: "Design cloud solutions with AWS, Azure, and Cloud technologies", salaryRange: "$150k - $200k", skills: ["AWS", "Cloud", "Architecture"] },
-        { id: "12", title: "JavaScript Developer", companyName: "CodeFactory", location: "Lahore, Pakistan", jobType: "Full-time", postedAt: "2024-11-20", description: "Develop web applications with JavaScript, Node.js, and Express", salaryRange: "$95k - $125k", skills: ["JavaScript", "Node.js", "Express"] },
-        { id: "13", title: "Python Developer", companyName: "PyTech", location: "Islamabad, Pakistan", jobType: "Full-time", postedAt: "2024-11-19", description: "Build backend services with Python, Flask, and REST APIs", salaryRange: "$100k - $135k", skills: ["Python", "Flask", "REST"] },
-        { id: "14", title: "Security Engineer", companyName: "SecureNet", location: "Rawalpindi, Pakistan", jobType: "Full-time", postedAt: "2024-11-18", description: "Protect systems with cybersecurity and DevOps practices", salaryRange: "$130k - $170k", skills: ["Security", "DevOps", "Cloud"] },
-        { id: "15", title: "Database Administrator", companyName: "DataMasters", location: "Peshawar, Pakistan", jobType: "Full-time", postedAt: "2024-11-17", description: "Manage databases with PostgreSQL, MongoDB, and SQL", salaryRange: "$110k - $140k", skills: ["PostgreSQL", "MongoDB", "SQL"] },
-        { id: "16", title: "Angular Developer", companyName: "WebWorks", location: "Quetta, Pakistan", jobType: "Internship", postedAt: "2024-11-16", description: "Create SPAs with Angular and TypeScript", salaryRange: "$90k - $115k", skills: ["Angular", "TypeScript", "JavaScript"] },
-        { id: "17", title: "Go Developer", companyName: "GoLang Inc", location: "Multan, Pakistan", jobType: "Full-time", postedAt: "2024-11-15", description: "Build microservices with Go and Docker", salaryRange: "$120k - $155k", skills: ["Go", "Docker", "Microservices"] },
-        { id: "18", title: "Rust Developer", companyName: "SystemCorp", location: "Faisalabad, Pakistan", jobType: "Full-time", postedAt: "2024-11-14", description: "Develop high-performance systems with Rust and C++", salaryRange: "$130k - $170k", skills: ["Rust", "C++", "Systems"] },
-        { id: "19", title: "GraphQL Engineer", companyName: "API Solutions", location: "Sialkot, Pakistan", jobType: "Full-time", postedAt: "2024-11-13", description: "Build APIs with GraphQL, Node.js, and REST", salaryRange: "$105k - $140k", skills: ["GraphQL", "Node.js", "REST"] },
-        { id: "20", title: "Kubernetes Specialist", companyName: "ContainerCo", location: "Sukkur, Pakistan", jobType: "Full-time", postedAt: "2024-11-12", description: "Manage container orchestration with Kubernetes and Docker", salaryRange: "$125k - $165k", skills: ["Kubernetes", "Docker", "DevOps"] },
-        { id: "21", title: "Next.js Developer", companyName: "Modern Web", location: "Karachi, Pakistan", jobType: "Full-time", postedAt: "2024-11-11", description: "Build server-side rendered apps with Next.js and React", salaryRange: "$110k - $145k", skills: ["Next.js", "React", "TypeScript"] },
-        { id: "22", title: "AI Research Scientist", companyName: "DeepMind Labs", location: "Lahore, Pakistan", jobType: "Full-time", postedAt: "2024-11-10", description: "Research AI and Machine Learning algorithms", salaryRange: "$160k - $220k", skills: ["AI", "Machine Learning", "Python"] },
-        { id: "23", title: "Blockchain Developer", companyName: "CryptoTech", location: "Islamabad, Pakistan", jobType: "Full-time", postedAt: "2024-11-09", description: "Develop blockchain applications with Solidity and Web3", salaryRange: "$140k - $180k", skills: ["Blockchain", "Solidity", "JavaScript"] },
-        { id: "24", title: "iOS Developer", companyName: "MobileFirst", location: "Rawalpindi, Pakistan", jobType: "Full-time", postedAt: "2024-11-08", description: "Build iOS apps with Swift and Xcode", salaryRange: "$115k - $150k", skills: ["iOS", "Swift", "Mobile"] },
-        { id: "25", title: "Android Developer", companyName: "AppDev", location: "Peshawar, Pakistan", jobType: "Full-time", postedAt: "2024-11-07", description: "Create Android applications with Kotlin and Java", salaryRange: "$110k - $145k", skills: ["Android", "Kotlin", "Java"] },
-        { id: "26", title: "Site Reliability Engineer", companyName: "ReliableOps", location: "Quetta, Pakistan", jobType: "Full-time", postedAt: "2024-11-06", description: "Ensure system reliability with SRE practices and automation", salaryRange: "$135k - $175k", skills: ["SRE", "DevOps", "Cloud"] },
-        { id: "27", title: "ETL Developer", companyName: "DataPipeline", location: "Multan, Pakistan", jobType: "Full-time", postedAt: "2024-11-05", description: "Build data pipelines with ETL tools and SQL", salaryRange: "$95k - $130k", skills: ["ETL", "SQL", "Data Science"] },
-        { id: "28", title: "Scala Developer", companyName: "Functional Code", location: "Faisalabad, Pakistan", jobType: "Internship", postedAt: "2024-11-04", description: "Develop functional programming solutions with Scala", salaryRange: "$120k - $160k", skills: ["Scala", "Functional", "Java"] },
-        { id: "29", title: "WordPress Developer", companyName: "CMS Agency", location: "Sialkot, Pakistan", jobType: "Contract", postedAt: "2024-11-03", description: "Build custom WordPress sites with PHP and JavaScript", salaryRange: "$70k - $90k", skills: ["WordPress", "PHP", "JavaScript"] },
-        { id: "30", title: "Shopify Developer", companyName: "Ecommerce Pro", location: "Sukkur, Pakistan", jobType: "Full-time", postedAt: "2024-11-02", description: "Create Shopify stores with Liquid and JavaScript", salaryRange: "$85k - $110k", skills: ["Shopify", "JavaScript", "Ecommerce"] },
-        { id: "31", title: "Unity Developer", companyName: "GameStudio", location: "Karachi, Pakistan", jobType: "Full-time", postedAt: "2024-11-01", description: "Develop games with Unity and C#", salaryRange: "$100k - $130k", skills: ["Unity", "C#", "Gaming"] },
-        { id: "32", title: "Unreal Engine Developer", companyName: "Epic Games Studio", location: "Lahore, Pakistan", jobType: "Full-time", postedAt: "2024-10-31", description: "Build AAA games with Unreal Engine and C++", salaryRange: "$110k - $150k", skills: ["Unreal", "C++", "Gaming"] },
-        { id: "33", title: "Salesforce Developer", companyName: "CRM Solutions", location: "Islamabad, Pakistan", jobType: "Full-time", postedAt: "2024-10-30", description: "Customize Salesforce with Apex and Lightning", salaryRange: "$105k - $140k", skills: ["Salesforce", "Apex", "CRM"] },
-        { id: "34", title: "SAP Consultant", companyName: "Enterprise Systems", location: "Rawalpindi, Pakistan", jobType: "Full-time", postedAt: "2024-10-29", description: "Implement SAP solutions for enterprise clients", salaryRange: "$120k - $160k", skills: ["SAP", "ERP", "Consulting"] },
-        { id: "35", title: "Embedded Systems Engineer", companyName: "Hardware Co", location: "Peshawar, Pakistan", jobType: "Full-time", postedAt: "2024-10-28", description: "Develop embedded systems with C and C++", salaryRange: "$110k - $145k", skills: ["C", "C++", "Embedded"] },
-      ];
-      const prepared = reorderJobsToAvoidAdjacentDuplicates(results).map(r => ({
-        ...r,
-        description: `${getPromptForJob(r.id)}\n\n${r.description || ''}`
+      const raw = await getJson<any[]>('/jobs');
+      const results: BackendJob[] = (raw || []).map((job, index) => ({
+        id: String(job?.id ?? `job-${index}`),
+        title: job?.title || 'Untitled',
+        companyName: job?.companyName || 'Unknown',
+        location: job?.location || 'Remote',
+        jobType: normalizeJobType(job?.jobType),
+        postedAt: job?.postedAt ?? null,
+        createdAt: job?.createdAt ?? null,
+        description: job?.description || '',
+        salaryRange: job?.salaryRange || '',
+        skills: Array.isArray(job?.skills) ? job.skills : undefined,
       }));
+
+      const prepared = results;
       const tree = new AVLTree<BackendJob>();
       prepared.forEach(job => {
         const skills = job.skills && job.skills.length > 0 ? job.skills : extractSkillsFromJob(job);
