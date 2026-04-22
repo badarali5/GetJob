@@ -142,6 +142,13 @@ public class JobService {
         return jobRepository.findAll();
     }
 
+    public Optional<Job> getJobById(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+        return jobRepository.findById(id);
+    }
+
     public Job postJob(Job job) {
         java.util.Objects.requireNonNull(job, "job must not be null");
         return jobRepository.save(job);
