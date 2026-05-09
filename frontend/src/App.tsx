@@ -9,7 +9,7 @@ interface ImportMeta {
 }
 
 import React from "react";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+// Google OAuth provider removed - manual auth only
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -45,10 +45,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <GoogleOAuthProvider
-          clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}
-        >
-          <BrowserRouter>
+        <BrowserRouter>
             <ScrollToHash />
             <Routes>
               <Route path="/" element={<Index />} />
@@ -61,7 +58,6 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </GoogleOAuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

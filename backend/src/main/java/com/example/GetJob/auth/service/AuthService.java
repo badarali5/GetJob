@@ -6,8 +6,6 @@ import com.example.GetJob.auth.dto.SignupRequest;
 import com.example.GetJob.auth.model.Role;
 import com.example.GetJob.auth.model.User;
 import com.example.GetJob.auth.repository.AuthUserRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,14 +16,12 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 public class AuthService {
     private final AuthUserRepository authUserRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SecretKey jwtSecretKey;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AuthService(AuthUserRepository authUserRepository,
                        @Value("${jwt.secret:mySecretKeyForJWTTokenGenerationThatIsLongEnough}") String jwtSecret) {
@@ -62,49 +58,7 @@ public class AuthService {
         return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
     }
 
-    public AuthResponse googleAuth(String googleToken) {
-        try {
-            JsonNode claims = decodeGoogleToken(googleToken);
-
-            String email = claims.get("email").asText();
-            String name = claims.has("name") ? claims.get("name").asText() : email.split("@")[0];
-
-            if (email == null || email.isEmpty()) {
-                throw new RuntimeException("Invalid Google token: email not found");
-            }
-            User user = authUserRepository.findByEmail(email).orElse(null);
-
-            if (user == null) {
-                user = new User();
-                user.setEmail(email);
-                user.setName(name);
-                user.setRole(Role.OTHER);
-                user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
-                user.setCreatedAt(LocalDateTime.now());
-                user = authUserRepository.save(user);
-            }
-            String token = generateToken(user);
-
-            return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
-        } catch (Exception e) {
-            throw new RuntimeException("Google authentication failed: " + e.getMessage());
-        }
-    }
-
-    private JsonNode decodeGoogleToken(String token) throws Exception {
-        String[] tokenParts = token.split("\\.");
-        if (tokenParts.length != 3) {
-            throw new RuntimeException("Invalid token format");
-        }
-        String payload = tokenParts[1];
-        int padding = 4 - (payload.length() % 4);
-        if (padding < 4) {
-            payload += "=".repeat(padding);
-        }
-
-        byte[] decodedBytes = java.util.Base64.getUrlDecoder().decode(payload);
-        return objectMapper.readTree(decodedBytes);
-    }
+    // Google sign-in removed. Manual signup and signin use email/password only.
 
     private String generateToken(User user) {
         return Jwts.builder()
