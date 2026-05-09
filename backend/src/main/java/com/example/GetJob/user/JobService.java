@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -144,6 +145,48 @@ public class JobService {
 
     public List<SavedJobs> getSavedJobsForUser(Long userId) {
         return savedJobsRepository.findByUser_IdOrderBySavedAtDesc(userId);
+    }
+
+    public Map<String, Object> getSqlConceptExamples() {
+        List<Object[]> joinRows = jobRepository.fetchApplicationJoinRows();
+        List<Object[]> subqueryRows = jobRepository.findPopularJobsWithApplications();
+
+        List<Map<String, Object>> joinResults = new ArrayList<>();
+        for (Object[] row : joinRows) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("applicationId", row[0]);
+            item.put("applicantName", row[1]);
+            item.put("applicantEmail", row[2]);
+            item.put("jobTitle", row[3]);
+            item.put("companyName", row[4]);
+            item.put("appliedAt", row[5]);
+            joinResults.add(item);
+        }
+
+        List<Map<String, Object>> subqueryResults = new ArrayList<>();
+        for (Object[] row : subqueryRows) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("jobId", row[0]);
+            item.put("jobTitle", row[1]);
+            item.put("jobLocation", row[2]);
+            item.put("companyName", row[3]);
+            item.put("applicationCount", row[4]);
+            subqueryResults.add(item);
+        }
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("joinExample", joinResults);
+        response.put("subqueryExample", subqueryResults);
+        response.put("counts", Map.of(
+                "joinRows", joinResults.size(),
+                "subqueryRows", subqueryResults.size()
+        ));
+        return response;
+    }
+
+    @Transactional
+    public void archiveOldSavedJobs(int days) {
+        savedJobsRepository.archiveOldSavedJobs(days);
     }
 
     public Optional<Job> getJobById(Long id) {
