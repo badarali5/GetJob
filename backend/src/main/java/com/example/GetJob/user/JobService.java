@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 
 
@@ -154,6 +155,19 @@ public class JobService {
         return jobRepository.save(job);
     }
 
+    public Map<String, Object> getSqlConceptExamples() {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("joinResults", jobRepository.fetchApplicationJoinRows().stream().map(this::toApplicationJoinMap).toList());
+        response.put("subqueryResults", jobRepository.findPopularJobsWithApplications().stream().map(this::toPopularJobMap).toList());
+        return response;
+    }
+
+    @Transactional
+    public void archiveOldSavedJobs(int days) {
+        int effectiveDays = Math.max(days, 1);
+        savedJobsRepository.archiveOldSavedJobs(effectiveDays);
+    }
+
     public List<Job> searchJobs(String title) {
         // First try database search
         List<Job> results = jobRepository.findByTitleContainingIgnoreCase(title);
@@ -256,6 +270,7 @@ public class JobService {
         return saved;
     }
 
+    @Transactional
     public Application applyForJob(Long userId, String jobId) {
 
     com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
@@ -280,6 +295,7 @@ public class JobService {
 }
 
 
+    @Transactional
     public SavedJobs saveJobForLater(Long userId, String jobId) {
 
     com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
@@ -307,6 +323,44 @@ public class JobService {
 
     return savedJobsRepository.save(saved);
 }
+
+    private Map<String, Object> toApplicationJoinMap(Object[] row) {
+        Map<String, Object> mapped = new LinkedHashMap<>();
+        mapped.put("applicationId", toLong(row, 0));
+        mapped.put("applicantName", toStringValue(row, 1));
+        mapped.put("applicantEmail", toStringValue(row, 2));
+        mapped.put("jobTitle", toStringValue(row, 3));
+        mapped.put("companyName", toStringValue(row, 4));
+        mapped.put("appliedAt", row.length > 5 && row[5] != null ? row[5].toString() : null);
+        return mapped;
+    }
+
+    private Map<String, Object> toPopularJobMap(Object[] row) {
+        Map<String, Object> mapped = new LinkedHashMap<>();
+        mapped.put("jobId", toLong(row, 0));
+        mapped.put("jobTitle", toStringValue(row, 1));
+        mapped.put("jobLocation", toStringValue(row, 2));
+        mapped.put("companyName", toStringValue(row, 3));
+        mapped.put("applicationCount", toLong(row, 4));
+        return mapped;
+    }
+
+    private Long toLong(Object[] row, int index) {
+        if (row.length <= index || row[index] == null) {
+            return null;
+        }
+        if (row[index] instanceof Number number) {
+            return number.longValue();
+        }
+        return Long.parseLong(row[index].toString());
+    }
+
+    private String toStringValue(Object[] row, int index) {
+        if (row.length <= index || row[index] == null) {
+            return null;
+        }
+        return row[index].toString();
+    }
 
 
 }
