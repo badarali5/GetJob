@@ -67,14 +67,25 @@ public class JobController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<SavedJobs> saveJobForLater(@RequestParam("userId") Long userId, @RequestParam("jobId") String jobId) {
+    public ResponseEntity<?> saveJobForLater(@RequestParam("userId") Long userId, @RequestParam("jobId") String jobId) {
         try {
             SavedJobs savedJob = jobService.saveJobForLater(userId, jobId);
             return ResponseEntity.ok(savedJob);
         } catch (Exception ex) {
             logger.error("Failed to save job for later", ex);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(java.util.Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/saved")
+    public ResponseEntity<List<SavedJobs>> getSavedJobs(@RequestParam("userId") Long userId) {
+        try {
+            List<SavedJobs> saved = jobService.getSavedJobsForUser(userId);
+            return ResponseEntity.ok(saved);
+        } catch (Exception ex) {
+            logger.error("Failed to fetch saved jobs", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }

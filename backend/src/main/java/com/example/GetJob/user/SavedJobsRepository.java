@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface SavedJobsRepository extends JpaRepository<SavedJobs, Long> {
 
-    List<SavedJobs> findByUser_Id(Long userId);
+    List<SavedJobs> findByUser_IdOrderBySavedAtDesc(Long userId);
 
     Optional<SavedJobs> findByUser_IdAndJob_Id(Long userId, Long jobId);
 

@@ -97,6 +97,7 @@ export function getToken() {
 }
 export function clearToken() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
 }
 
 export function getUser() {
@@ -107,6 +108,38 @@ export function getUser() {
     } catch {
         return null;
     }
+}
+export async function uploadResume(userId: number, file: File) {
+    const url = API_BASE ? `${API_BASE}/api/auth/resume` : '/api/auth/resume';
+    const form = new FormData();
+    form.append('userId', String(userId));
+    form.append('file', file);
+
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(url, { method: 'POST', body: form, headers, credentials: 'same-origin' });
+    if (!res.ok) {
+        let body = null;
+        try { body = await res.json(); } catch {};
+        throw { status: res.status, body };
+    }
+    const body = await res.json();
+    // merge existing token if present, then update stored user
+    const existingToken = getToken();
+    const stored = getUser() || {};
+    const merged = {
+        id: body.id ?? stored.id,
+        name: body.name ?? stored.name,
+        email: body.email ?? stored.email,
+        role: body.role ?? stored.role,
+        token: body.token ?? existingToken ?? stored.token,
+        resumeUrl: body.resumeUrl ?? stored.resumeUrl,
+    };
+    localStorage.setItem('user', JSON.stringify(merged));
+    if (merged.token) localStorage.setItem('token', merged.token);
+    return merged;
 }
 export function applyForJob(userId: number, jobId: string) {
     return postJson(`/jobs/apply?userId=${userId}&jobId=${encodeURIComponent(jobId)}`, {});

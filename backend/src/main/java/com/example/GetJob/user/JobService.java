@@ -142,6 +142,10 @@ public class JobService {
         return jobRepository.findAll();
     }
 
+    public List<SavedJobs> getSavedJobsForUser(Long userId) {
+        return savedJobsRepository.findByUser_IdOrderBySavedAtDesc(userId);
+    }
+
     public Optional<Job> getJobById(Long id) {
         if (id == null) {
             return Optional.empty();
@@ -261,6 +265,11 @@ public class JobService {
     com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
+    // Require user to have uploaded resume before applying
+    if (user.getResumeUrl() == null || user.getResumeUrl().isBlank()) {
+        throw new RuntimeException("Please upload your resume before applying for jobs.");
+    }
+
     Long jobIdLong;
     try {
         jobIdLong = Long.parseLong(jobId);
@@ -275,38 +284,43 @@ public class JobService {
     application.setUser(user);
     application.setJob(job);
     application.setAppliedAt(java.time.LocalDateTime.now());
+    application.setResumeUrl(user.getResumeUrl());
 
     return applicationRepository.save(application);
 }
 
 
     public SavedJobs saveJobForLater(Long userId, String jobId) {
+        // Validate userId
+        if (userId == null || userId <= 0) {
+            throw new RuntimeException("Invalid user ID: " + userId);
+        }
 
-    com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-    Long jobIdLong;
-    try {
-        jobIdLong = Long.parseLong(jobId);
-    } catch (NumberFormatException e) {
-        throw new RuntimeException("Invalid job ID format");
+        Long jobIdLong;
+        try {
+            jobIdLong = Long.parseLong(jobId);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid job ID format: " + jobId);
+        }
+
+        Job job = jobRepository.findById(jobIdLong)
+                .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobIdLong));
+
+        // Prevent duplicate saves
+        if (savedJobsRepository.existsByUser_IdAndJob_Id(userId, jobIdLong)) {
+            throw new RuntimeException("Job already saved by user");
+        }
+
+        SavedJobs saved = new SavedJobs();
+        saved.setUser(user);
+        saved.setJob(job);
+        saved.setSavedAt(java.time.LocalDateTime.now());
+
+        return savedJobsRepository.save(saved);
     }
-
-    Job job = jobRepository.findById(jobIdLong)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
-
-    // Prevent duplicate saves
-    if (savedJobsRepository.existsByUser_IdAndJob_Id(userId, jobIdLong)) {
-        throw new RuntimeException("Job already saved by user");
-    }
-
-    SavedJobs saved = new SavedJobs();
-    saved.setUser(user);
-    saved.setJob(job);
-    saved.setSavedAt(java.time.LocalDateTime.now());
-
-    return savedJobsRepository.save(saved);
-}
 
 
 }

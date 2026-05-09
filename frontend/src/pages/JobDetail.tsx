@@ -141,11 +141,22 @@ const JobDetail = () => {
     const user = getUser();
     if (!user || !user.id) {
       toast({
-        title: "Authentication Required",
+        title: "Sign in Required",
         description: "Please sign in to apply for jobs.",
         variant: "destructive",
       });
       navigate("/signin");
+      return;
+    }
+
+    // Check if resume is already uploaded (only ask once)
+    if (!user.resumeUrl) {
+      toast({
+        title: "Resume Required",
+        description: "Please upload your resume first. You only need to do this once.",
+        variant: "destructive",
+      });
+      navigate('/profile');
       return;
     }
 
@@ -181,7 +192,7 @@ const JobDetail = () => {
     const user = getUser();
     if (!user || !user.id) {
       toast({
-        title: "Authentication Required",
+        title: "Sign in Required",
         description: "Please sign in to save jobs.",
         variant: "destructive",
       });
@@ -198,19 +209,35 @@ const JobDetail = () => {
       return;
     }
 
+    // Client-side save only: persist saved jobs to localStorage (skeleton/demo mode)
     setIsSaving(true);
     try {
-      await saveJobForLater(user.id, id);
+      const stored: Array<any> = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+      // avoid duplicates per user + job
+      const exists = stored.find((s) => s.jobId === id && s.userId === user.id);
+      if (!exists) {
+        const jobItem = {
+          id: Date.now(),
+          userId: user.id,
+          jobId: id,
+          job: jobDetails
+            ? {
+                id: jobDetails.id,
+                title: jobDetails.title,
+                companyName: jobDetails.company,
+                location: jobDetails.location,
+                description: jobDetails.description,
+              }
+            : { id: id, title: 'Untitled' },
+          savedAt: new Date().toISOString(),
+        };
+        stored.unshift(jobItem);
+        localStorage.setItem('savedJobs', JSON.stringify(stored));
+      }
       setHasSaved(true);
       toast({
-        title: "Success!",
-        description: "Job saved for later.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error?.message || "Failed to save job. Please try again.",
-        variant: "destructive",
+        title: "Job Saved! 🎉",
+        description: "Saved locally — open Saved Jobs to view it.",
       });
     } finally {
       setIsSaving(false);
