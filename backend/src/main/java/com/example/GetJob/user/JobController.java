@@ -37,6 +37,23 @@ public class JobController {
         return ResponseEntity.ok(jobService.postJob(job));
     }
 
+    @GetMapping("/sql-concepts")
+    public ResponseEntity<java.util.Map<String, Object>> getSqlConceptExamples() {
+        return ResponseEntity.ok(jobService.getSqlConceptExamples());
+    }
+
+    @PostMapping("/archive-old-saved-jobs")
+    public ResponseEntity<String> archiveOldSavedJobs(@RequestParam(value = "days", defaultValue = "90") int days) {
+        try {
+            jobService.archiveOldSavedJobs(days);
+            return ResponseEntity.ok("Archived saved jobs older than " + days + " days.");
+        } catch (Exception ex) {
+            logger.error("Failed to archive saved jobs", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Failed to archive saved jobs: " + ex.getMessage());
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<Job>> getJobs() {
         return ResponseEntity.ok(jobService.getJobs());

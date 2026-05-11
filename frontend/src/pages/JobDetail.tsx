@@ -127,8 +127,21 @@ const JobDetail = () => {
         const job = await getJson<BackendJob>(`/jobs/${id}`);
         setJobDetails(toJobDetail(job));
       } catch (fetchError: any) {
-        setError(fetchError?.status === 404 ? "Job not found." : "Failed to load job details.");
-        setJobDetails(null);
+        // Fallback: if single-job endpoint is unavailable, resolve from the jobs list.
+        try {
+          const jobs = await getJson<BackendJob[]>("/jobs");
+          const matched = (jobs || []).find((job) => String(job.id) === String(id));
+          if (matched) {
+            setJobDetails(toJobDetail(matched));
+            setError(null);
+          } else {
+            setError("Job not found.");
+            setJobDetails(null);
+          }
+        } catch {
+          setError(fetchError?.status === 404 ? "Job not found." : "Failed to load job details.");
+          setJobDetails(null);
+        }
       } finally {
         setLoading(false);
       }
