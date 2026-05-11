@@ -33,7 +33,7 @@ const Profile = () => {
       }
       
       toast({ 
-        title: "✓ Resume Uploaded!", 
+        title: "Resume Uploaded!", 
         description: "Your resume is saved. You can now apply for jobs without uploading again." 
       });
       setTimeout(() => navigate('/jobs'), 2000);

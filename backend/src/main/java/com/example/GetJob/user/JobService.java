@@ -57,7 +57,6 @@ public class JobService {
             } else if (apiUrl.toLowerCase().contains("search")) {
                 url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + defaultQuery + "&num_pages=1";
             } else {
-                // non-search endpoint (e.g. internships list) — call as-is
                 url = apiUrl;
             }
         } else {
@@ -174,7 +173,6 @@ public class JobService {
     }
 
     public List<Job> searchJobs(String title) {
-        // First try database search
         List<Job> results = jobRepository.findByTitleContainingIgnoreCase(title);
         if (results != null && !results.isEmpty()) {
             return results;
@@ -281,7 +279,6 @@ public class JobService {
     com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // Require user to have uploaded resume before applying
     if (user.getResumeUrl() == null || user.getResumeUrl().isBlank()) {
         throw new RuntimeException("Please upload your resume before applying for jobs.");
     }
@@ -308,7 +305,6 @@ public class JobService {
 
     @Transactional
     public SavedJobs saveJobForLater(Long userId, String jobId) {
-        // Validate userId
         if (userId == null || userId <= 0) {
             throw new RuntimeException("Invalid user ID: " + userId);
         }

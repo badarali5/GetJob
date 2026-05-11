@@ -195,6 +195,70 @@ CREATE INDEX idx_application_audit_application_id ON public.application_audit(ap
 CREATE INDEX idx_application_audit_action_at ON public.application_audit(action_at DESC);
 CREATE INDEX idx_saved_jobs_archive_saved_at ON public.saved_jobs_archive(saved_at DESC);
 
+CREATE OR REPLACE VIEW public.view_jobs_with_company AS
+SELECT j.id,
+	   j.title,
+	   j.location,
+	   j.description,
+	   j.salary_range,
+	   j.type,
+	   j.apply_url,
+	   j.source,
+	   j.posted_at,
+	   j.created_at,
+	   j.company_name,
+	   j.company_id,
+	   c.logo_url AS company_logo_url,
+	   c.location AS company_location
+FROM public.job j
+JOIN public.company c ON j.company_id = c.id;
+
+
+CREATE OR REPLACE VIEW public.view_popular_jobs AS
+SELECT j.id AS job_id,
+	   j.title,
+	   j.location,
+	   j.company_name,
+	   COUNT(a.id) AS application_count
+FROM public.job j
+LEFT JOIN public.applications a ON a.job_id = j.id
+GROUP BY j.id, j.title, j.location, j.company_name
+ORDER BY application_count DESC, j.created_at DESC;
+
+CREATE OR REPLACE VIEW public.view_user_applications AS
+SELECT a.id AS application_id,
+	   a.user_id,
+	   a.job_id,
+	   a.resume_url,
+	   a.applied_at,
+	   j.title AS job_title,
+	   j.company_name
+FROM public.applications a
+JOIN public.job j ON a.job_id = j.id;
+
+CREATE OR REPLACE VIEW public.view_saved_jobs AS
+SELECT s.id AS saved_id,
+	   s.user_id,
+	   s.job_id,
+	   s.saved_at,
+	   j.title AS job_title,
+	   j.company_name,
+	   j.location AS job_location
+FROM public.saved_jobs s
+JOIN public.job j ON s.job_id = j.id;
+
+CREATE OR REPLACE VIEW public.view_application_audit AS
+SELECT aa.audit_id,
+	   aa.application_id,
+	   aa.user_id,
+	   aa.job_id,
+	   aa.action_type,
+	   aa.action_at,
+	   aa.details,
+	   j.title AS job_title
+FROM public.application_audit aa
+LEFT JOIN public.job j ON aa.job_id = j.id;
+
 CREATE OR REPLACE FUNCTION public.sync_job_company()
 RETURNS trigger
 LANGUAGE plpgsql

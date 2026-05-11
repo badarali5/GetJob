@@ -44,6 +44,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
-
-    // Google sign-in endpoint removed. Use manual signup/signin with email and password.
 }
