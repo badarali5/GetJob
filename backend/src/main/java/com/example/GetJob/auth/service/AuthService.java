@@ -3,7 +3,6 @@ package com.example.GetJob.auth.service;
 import com.example.GetJob.auth.dto.AuthResponse;
 import com.example.GetJob.auth.dto.SigninRequest;
 import com.example.GetJob.auth.dto.SignupRequest;
-import com.example.GetJob.auth.model.Role;
 import com.example.GetJob.auth.model.User;
 import com.example.GetJob.auth.repository.AuthUserRepository;
 import io.jsonwebtoken.Jwts;
