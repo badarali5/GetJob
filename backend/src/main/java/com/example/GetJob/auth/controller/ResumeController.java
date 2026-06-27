@@ -2,6 +2,7 @@ package com.example.GetJob.auth.controller;
 
 import com.example.GetJob.auth.repository.AuthUserRepository;
 import com.example.GetJob.auth.model.User;
+import com.example.GetJob.storage.ResumeStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,12 @@ public class ResumeController {
     private static final Logger logger = LoggerFactory.getLogger(ResumeController.class);
 
     private final AuthUserRepository authUserRepository;
+    private final ResumeStorageService resumeStorageService;
 
     @Autowired
-    public ResumeController(AuthUserRepository authUserRepository) {
+    public ResumeController(AuthUserRepository authUserRepository, ResumeStorageService resumeStorageService) {
         this.authUserRepository = authUserRepository;
+        this.resumeStorageService = resumeStorageService;
     }
 
     @PostMapping("/resume")
@@ -35,14 +38,12 @@ public class ResumeController {
             return ResponseEntity.badRequest().body(Map.of("error", "No file uploaded"));
         }
 
-        // Mock resume upload: generate a URL string based on file name and timestamp (no actual file I/O)
-        String filename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "resume.pdf";
-        String mockResumeUrl = "/resume/" + userId + "/" + Instant.now().toEpochMilli() + "_" + filename;
-        
-        user.setResumeUrl(mockResumeUrl);
+        String resumeUrl = resumeStorageService.storeResume(userId, file);
+
+        user.setResumeUrl(resumeUrl);
         authUserRepository.save(user);
-        
-        logger.info("Resume uploaded for user {}: {}", userId, mockResumeUrl);
+
+        logger.info("Resume uploaded for user {}: {}", userId, resumeUrl);
 
         // Return AuthResponse-like payload so frontend can update stored user
         com.example.GetJob.auth.dto.AuthResponse resp = new com.example.GetJob.auth.dto.AuthResponse(
