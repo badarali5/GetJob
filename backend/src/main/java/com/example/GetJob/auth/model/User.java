@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "\"User\"")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,4 +30,7 @@ public class User {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "resume_url")
+    private String resumeUrl;
 }

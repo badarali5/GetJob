@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: getjob-postgres
+    environment:
+      POSTGRES_DB: getjobdb
+      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SPRING_DATASOURCE_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - getjob-network
+
+  # Backend Service (Spring Boot)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: getjob-backend
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/getjobdb}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
+      SPRING_SQL_INIT_MODE: ${SPRING_SQL_INIT_MODE:-always}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-before-deploying}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      APP_STORAGE_LOCAL_DIR: ${APP_STORAGE_LOCAL_DIR:-/data/uploads/resumes}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      AWS_REGION: ${AWS_REGION:-}
+      AWS_S3_PUBLIC_BASE_URL: ${AWS_S3_PUBLIC_BASE_URL:-}
+      AWS_S3_PREFIX: ${AWS_S3_PREFIX:-resumes}
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - getjob-network
+    restart: unless-stopped
+    volumes:
+      - backend_uploads:/data/uploads/resumes
+
+  # Frontend Service (React/Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: getjob-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8081}
+      RAPID_API_KEY: ${RAPID_API_KEY:-}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - getjob-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+  backend_uploads:
+    driver: local
+
+networks:
+  getjob-network:
+    driver: bridge

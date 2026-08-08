@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +57,6 @@ public class JobService {
             } else if (apiUrl.toLowerCase().contains("search")) {
                 url = apiUrl + (apiUrl.contains("?") ? "&" : "?") + "query=" + defaultQuery + "&num_pages=1";
             } else {
-                // non-search endpoint (e.g. internships list) — call as-is
                 url = apiUrl;
             }
         } else {
@@ -143,6 +143,10 @@ public class JobService {
         return jobRepository.findAll();
     }
 
+    public List<SavedJobs> getSavedJobsForUser(Long userId) {
+        return savedJobsRepository.findByUser_IdOrderBySavedAtDesc(userId);
+    }
+
     public Optional<Job> getJobById(Long id) {
         if (id == null) {
             return Optional.empty();
@@ -169,7 +173,6 @@ public class JobService {
     }
 
     public List<Job> searchJobs(String title) {
-        // First try database search
         List<Job> results = jobRepository.findByTitleContainingIgnoreCase(title);
         if (results != null && !results.isEmpty()) {
             return results;
@@ -276,6 +279,10 @@ public class JobService {
     com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
+    if (user.getResumeUrl() == null || user.getResumeUrl().isBlank()) {
+        throw new RuntimeException("Please upload your resume before applying for jobs.");
+    }
+
     Long jobIdLong;
     try {
         jobIdLong = Long.parseLong(jobId);
@@ -290,6 +297,7 @@ public class JobService {
     application.setUser(user);
     application.setJob(job);
     application.setAppliedAt(java.time.LocalDateTime.now());
+    application.setResumeUrl(user.getResumeUrl());
 
     return applicationRepository.save(application);
 }
@@ -297,32 +305,35 @@ public class JobService {
 
     @Transactional
     public SavedJobs saveJobForLater(Long userId, String jobId) {
+        if (userId == null || userId <= 0) {
+            throw new RuntimeException("Invalid user ID: " + userId);
+        }
 
-    com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        com.example.GetJob.auth.model.User user = authUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-    Long jobIdLong;
-    try {
-        jobIdLong = Long.parseLong(jobId);
-    } catch (NumberFormatException e) {
-        throw new RuntimeException("Invalid job ID format");
+        Long jobIdLong;
+        try {
+            jobIdLong = Long.parseLong(jobId);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid job ID format: " + jobId);
+        }
+
+        Job job = jobRepository.findById(jobIdLong)
+                .orElseThrow(() -> new RuntimeException("Job not found with ID: " + jobIdLong));
+
+        // Prevent duplicate saves
+        if (savedJobsRepository.existsByUser_IdAndJob_Id(userId, jobIdLong)) {
+            throw new RuntimeException("Job already saved by user");
+        }
+
+        SavedJobs saved = new SavedJobs();
+        saved.setUser(user);
+        saved.setJob(job);
+        saved.setSavedAt(java.time.LocalDateTime.now());
+
+        return savedJobsRepository.save(saved);
     }
-
-    Job job = jobRepository.findById(jobIdLong)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
-
-    // Prevent duplicate saves
-    if (savedJobsRepository.existsByUser_IdAndJob_Id(userId, jobIdLong)) {
-        throw new RuntimeException("Job already saved by user");
-    }
-
-    SavedJobs saved = new SavedJobs();
-    saved.setUser(user);
-    saved.setJob(job);
-    saved.setSavedAt(java.time.LocalDateTime.now());
-
-    return savedJobsRepository.save(saved);
-}
 
     private Map<String, Object> toApplicationJoinMap(Object[] row) {
         Map<String, Object> mapped = new LinkedHashMap<>();
@@ -361,7 +372,6 @@ public class JobService {
         }
         return row[index].toString();
     }
-
 
 }
 

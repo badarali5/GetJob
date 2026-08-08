@@ -3,7 +3,6 @@ package com.example.GetJob.auth.service;
 import com.example.GetJob.auth.dto.AuthResponse;
 import com.example.GetJob.auth.dto.SigninRequest;
 import com.example.GetJob.auth.dto.SignupRequest;
-import com.example.GetJob.auth.model.Role;
 import com.example.GetJob.auth.model.User;
 import com.example.GetJob.auth.repository.AuthUserRepository;
 import io.jsonwebtoken.Jwts;
@@ -44,7 +43,7 @@ public class AuthService {
         user = authUserRepository.save(user);
         String token = generateToken(user);
 
-        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
+        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token, user.getResumeUrl());
     }
 
     public AuthResponse signin(SigninRequest request) {
@@ -55,7 +54,7 @@ public class AuthService {
         }
         String token = generateToken(user);
 
-        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
+        return new AuthResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), token, user.getResumeUrl());
     }
 
     // Google sign-in removed. Manual signup and signin use email/password only.

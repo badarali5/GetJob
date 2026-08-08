@@ -21,6 +21,9 @@ public class Application {
 
     @Column(nullable = false)
     private LocalDateTime appliedAt;
+    
+    @Column(name = "resume_url")
+    private String resumeUrl;
     public Application() {}
 
     public Application(com.example.GetJob.auth.model.User user, Job job) {
@@ -39,4 +42,7 @@ public class Application {
 
     public LocalDateTime getAppliedAt() { return appliedAt; }
     public void setAppliedAt(LocalDateTime appliedAt) { this.appliedAt = appliedAt; }
+
+    public String getResumeUrl() { return resumeUrl; }
+    public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
 }

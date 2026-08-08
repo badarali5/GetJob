@@ -13,9 +13,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByTitleContainingIgnoreCase(String search);
     List<Job> findByJobType(String type);
 
-    @Query("SELECT j FROM Job j WHERE lower(coalesce(j.title,'')) = lower(coalesce(:title,'')) AND lower(coalesce(j.companyName,'')) = lower(coalesce(:company,'')) AND lower(coalesce(j.location,'')) = lower(coalesce(:location,''))")
-    Optional<Job> findExisting(@Param("title") String title, @Param("company") String company, @Param("location") String location);
-
     @Query(value = """
             SELECT a.id AS application_id,
                    u.name AS applicant_name,
@@ -51,4 +48,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             ORDER BY application_count DESC, j.created_at DESC, j.id DESC
             """, nativeQuery = true)
     List<Object[]> findPopularJobsWithApplications();
+
+    @Query("SELECT j FROM Job j WHERE lower(coalesce(j.title,'')) = lower(coalesce(:title,'')) AND lower(coalesce(j.companyName,'')) = lower(coalesce(:company,'')) AND lower(coalesce(j.location,'')) = lower(coalesce(:location,''))")
+    Optional<Job> findExisting(@Param("title") String title, @Param("company") String company, @Param("location") String location);
 }

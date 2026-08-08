@@ -1,15 +1,6 @@
 /// <reference types="vite/client" />
 
-interface ImportMetaEnv {
-  readonly VITE_GOOGLE_CLIENT_ID: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
-
 import React from "react";
-// Google OAuth provider removed - manual auth only
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +12,8 @@ import JobDetail from "./pages/JobDetail";
 import Employers from "./pages/Employers";
 import Signup from "./pages/Signup";
 import Signin from "./pages/Signin";
+import Profile from "./pages/Profile";
+import SavedJobs from "./pages/SavedJobs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +48,8 @@ const App = () => {
               <Route path="/employers" element={<Employers />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/signin" element={<Signin />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/saved" element={<SavedJobs />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

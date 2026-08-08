@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { getUser, clearToken } from "@/lib/api";
 import { Briefcase } from "lucide-react";
 
 const Navbar = () => {
@@ -41,16 +42,37 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link to="/signin">
-            <Button variant="ghost" size="lg">
-              Sign In
-            </Button>
-          </Link>
-          <Link to="/signup">
-            <Button variant="hero" size="lg">
-              Get Started
-            </Button>
-          </Link>
+          {(() => {
+            const user = getUser();
+            if (user && user.id) {
+              return (
+                <div className="flex items-center gap-3">
+                  <Link to="/profile">
+                    <Button variant={user.resumeUrl ? "default" : "outline"} size="sm">
+                      {user.resumeUrl ? "✓ Resume" : "Upload Resume"}
+                    </Button>
+                  </Link>
+                  <Link to="/saved">
+                    <Button variant="ghost" size="sm">Saved Jobs</Button>
+                  </Link>
+                  <Link to="/profile" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                    {user.name}
+                  </Link>
+                  <Button variant="ghost" size="sm" onClick={() => { clearToken(); window.location.href = '/'; }}>Sign Out</Button>
+                </div>
+              );
+            }
+            return (
+              <>
+                <Link to="/signin">
+                  <Button variant="ghost" size="lg">Sign In</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="hero" size="lg">Get Started</Button>
+                </Link>
+              </>
+            );
+          })()}
         </div>
 
       </div>
